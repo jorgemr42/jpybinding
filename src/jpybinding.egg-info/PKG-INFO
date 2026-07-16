@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: jpybinding
+Version: 0.1.0
+Summary: Python package for tight-binding calculations
+Author: Jorge Martínez
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+
+# jpybinding
