@@ -137,7 +137,122 @@ class Model:
     
         
 
+    
+    def hamiltonian(self,auto_conjugate=True):
 
+        N = self.n1 * self.n2 * self.lattice.norbs
+
+        H_entries = []
+        Dx_entries = []
+        Dy_entries = []
+
+        S = np.zeros((N, len(self.lattice.a1)), dtype=float)
+        Omega=np.linalg.norm(np.cross(self.n1*self.lattice.a1,self.n2*self.lattice.a2))
+
+        def cell_index(ix, iy):
+            return (iy * self.n1 + ix) * self.lattice.norbs
+
+        # ----------------------------------------------------
+        # Onsites + orbital positions
+        # ----------------------------------------------------
+        for ix in range(self.n1):
+            for iy in range(self.n2):
+
+                R = ix * self.lattice.a1 + iy * self.lattice.a2
+                offset = cell_index(ix, iy)
+
+                for sub in self.lattice.sublattices:
+
+                    pos = R + np.asarray(sub["position"], dtype=float)
+                    inds = self.lattice.sub_index_orb[sub["name"]]
+
+                    onsite = np.asarray(sub["onsite"])
+
+                    if onsite.ndim == 0 or onsite.ndim == 1 :
+                        onsite = onsite.reshape((1, 1))
+
+                    for i, oi in enumerate(inds):
+                        S[offset + oi] = pos
+                        for j, oj in enumerate(inds):
+                            H_entries.append((offset + oi,offset + oj,onsite[i, j]))
+    
+
+        # ----------------------------------------------------
+        # Hoppings
+        # ----------------------------------------------------
+        for ix in range(self.n1):
+            for iy in range(self.n2):
+
+                offset1 = cell_index(ix, iy)
+
+                Ri = ix * self.lattice.a1 + iy * self.lattice.a2
+
+                for hop in self.lattice.hoppings:
+
+                    dx, dy = hop["relative_index"]
+
+                    jx = (ix + dx) % self.n1
+                    jy = (iy + dy) % self.n2
+
+                    offset2 = cell_index(jx, jy)
+
+                    from_inds = self.lattice.sub_index_orb[hop["from"]]
+                    to_inds = self.lattice.sub_index_orb[hop["to"]]
+
+                    t = np.asarray(hop["energy"], dtype=np.complex128)
+                    if t.ndim == 0:
+                        t = t.reshape((1, 1))
+
+                    sub_from = self.lattice.sublattices[
+                        self.lattice.sub_index_sml[hop["from"]]
+                    ]
+                    sub_to = self.lattice.sublattices[
+                        self.lattice.sub_index_sml[hop["to"]]
+                    ]
+
+                    r_from = Ri + np.asarray(sub_from["position"], dtype=float)
+                    r_to = (
+                        Ri
+                        + dx * self.lattice.a1
+                        + dy * self.lattice.a2
+                        + np.asarray(sub_to["position"], dtype=float)
+                    )
+
+                    dr = r_to - r_from
+
+
+                    for i, oi in enumerate(from_inds):
+                        for j, oj in enumerate(to_inds):
+
+                                
+                            H_entries.append((offset2+oj, offset1+oi, t[j,i]))
+
+                            Dx_entries.append((offset2 + oj, offset1 + oi,  dr[0]))
+
+                            Dy_entries.append((offset2 + oj, offset1 + oi,  dr[1]))
+                            
+                            if auto_conjugate is True:
+                                H_entries.append(( offset1+oi,offset2+oj, t[j,i].conjugate()))
+                                Dx_entries.append((offset1 + oi, offset2 + oj, -dr[0]))
+                                Dy_entries.append((offset1 + oi, offset2 + oj, -dr[1]))
+
+
+
+
+        def build_csr(entries):
+            rows = np.fromiter((e[0] for e in entries), dtype=np.int32)
+            cols = np.fromiter((e[1] for e in entries), dtype=np.int32)
+            data = np.fromiter((e[2] for e in entries), dtype=np.asarray(entries[0][2]).dtype)
+            return sci.sparse.coo_matrix((data, (rows, cols)), shape=(N, N)).tocsr()
+
+
+        H = build_csr(H_entries)
+        
+        Dx = build_csr(Dx_entries)
+
+        Dy = build_csr(Dy_entries)
+
+        return H, S, Omega, Dx, Dy
 
 
 
