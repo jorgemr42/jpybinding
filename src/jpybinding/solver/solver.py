@@ -1,10 +1,25 @@
 import numpy as np
 import scipy as sci
 import matplotlib.pyplot as plt
+from tqdm import tqdm 
+
 
 plt.rcParams['text.usetex'] = True
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = ['Computer Modern']
+
+
+def FD(Temp,mu,E):
+    kb=8.617333*1e-5 #in eV/K^-1
+
+    if Temp==0:
+        if E<=mu:
+            return 1
+        else:
+            return 0
+    else:
+        return 1/(1+np.exp((E-mu)/(Temp*kb)))
+
 
 class Solver:
 
@@ -13,9 +28,6 @@ class Solver:
         self.model = model
         self.ene=None
         self.vec=None
-
-
-
 
 
     def H_k_1(self,k_point=None):
@@ -47,7 +59,7 @@ class Solver:
 
 
             dist = np.asarray(r_from) - np.asarray(r_to) - np.asarray(R)
-            value=hop['energy']*np.exp(-1j*(np.dot(k_point,dist)))
+            value=hop['energy']*np.exp(1j*(np.dot(k_point,dist)))
 
             Hk[np.ix_(rows, cols)] += value
             Hk[np.ix_(cols, rows)] += value.conj().T
@@ -88,14 +100,24 @@ class Solver:
 
 
             dist = np.asarray(r_from) - np.asarray(r_to) - np.asarray(R)
-            value=hop['energy']*np.exp(-1j*(np.dot(k_point,dist)))
 
-            Hk[np.ix_(rows, cols)] += value
-            Hk[np.ix_(cols, rows)] += value.conj().T
+            value_h=hop['energy']*np.exp(1j*(np.dot(k_point,dist)))
+            ## Velocities
+            value_v1=1j*dist[0]*value_h
+            value_v2=1j*dist[1]*value_h
+
+            Hk[np.ix_(rows, cols)] += value_h
+            Hk[np.ix_(cols, rows)] += value_h.conj().T
+
+            Vk1[np.ix_(rows, cols)] += value_v1
+            Vk1[np.ix_(cols, rows)] += value_v1.conj().T
 
 
+            Vk2[np.ix_(rows, cols)] += value_v2
+            Vk2[np.ix_(cols, rows)] += value_v2.conj().T
 
-        return Hk
+
+        return Hk,Vk1,Vk2
 
 
 
@@ -194,6 +216,46 @@ class Solver:
         return pol_mat,pol_mat_filter
 
     
+    def kubo(self,mu_vec,broadening=1e-9,Temp=0,operator=None):
+
+        
+        ene_mat=np.zeros((len(self.model.k_grid),self.model.lattice.norbs),dtype=np.float64)
+        vec_mat=np.zeros((len(self.model.k_grid),self.model.lattice.norbs,self.model.lattice.norbs),dtype=np.complex128)
+        sigma_sur=np.zeros(len(mu_vec),dtype=np.float64)
+        sigma_sea=np.zeros(len(mu_vec),dtype=np.float64)
+        
+        for i in tqdm(range(len(self.model.k_grid))):
+            H,Vx,Vy=self.H_k_1_and_V_k_1(self.model.k_grid[i])
+            
+            ene_mat[i,:],vec_mat[i,:]=np.linalg.eigh(H)
+
+            if operator is None:
+                Vx_O=Vx
+            else:
+                Vx_O=Vx@operator+operator@Vx
+            
+            for n in range(self.model.lattice.norbs):
+                for m in range(self.model.lattice.norbs):
+                    term_sur = np.real((np.vdot(vec_mat[i,:, n], Vx_O @ vec_mat[i,:, m,]) *np.vdot(vec_mat[i,:, m], Vx @ vec_mat[i,:, n])))
+                    term_sea = np.imag((np.vdot(vec_mat[i,:, n], Vx_O @ vec_mat[i,:, m,]) *np.vdot(vec_mat[i,:, m], Vy @ vec_mat[i,:, n])))
+
+                    for mu in range(len(mu_vec)):
+
+                        sigma_sur[mu]+=broadening**2*term_sur/(((mu_vec[mu]-ene_mat[i,n])**2+broadening**2)*((mu_vec[mu]-ene_mat[i,m])**2+broadening**2))
+                        if n!=m:
+                            sigma_sea[mu]+=(FD(Temp,mu_vec[mu],ene_mat[i,n])-FD(Temp,mu_vec[mu],ene_mat[i,m]))*term_sea/((ene_mat[i,n]-ene_mat[i,m])**2+broadening**2)
+                        
+        
+        # For integration factors
+        dk=abs(np.cross(self.model.b1, self.model.b2)[-1])/len(self.model.k_grid)
+
+
+        sigma_sur *= 2*dk/(2*np.pi)**2
+        sigma_sea *= 2*np.pi*dk/(2*np.pi)**2
+
+
+        
+        return sigma_sur,sigma_sea
 
 
 

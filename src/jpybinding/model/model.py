@@ -47,7 +47,12 @@ class Model:
 
         self.lattice = lattice
         self.n1=n1
+        
+        if n2 is None:
+            n2=n1
+        
         self.n2=n2
+
         self.space = space.lower()
 
         if self.space in ["k", "reciprocal"]:
@@ -60,7 +65,11 @@ class Model:
             self.b3 = self.reciprocal_vectors[2]
             
 
-            self.k_grid=k_grid_calc([self.b1,self.b2],n1,n2)
+
+            if len(self.lattice.sublattices[0]['position'])==3:
+                self.k_grid=k_grid_calc([self.b1,self.b2],n1,n2)
+            elif len(self.lattice.sublattices[0]['position'])==2:
+                self.k_grid=k_grid_calc([self.b1[:-1],self.b2[:-1]],n1,n2)
 
 
 
