@@ -15,7 +15,31 @@ def k_grid_calc(reciprocal_vectors_list,nk1,nk2):
     
     return k_points
 
+def reciprocal_vectors_calc(lat):
+    if lat.a3 is not None:
 
+        V=np.dot(lat.a1,np.cross(lat.a2,lat.a3))
+        reciprocal_vectors_list=[2*np.pi*np.cross(lat.a2,lat.a3)/V,
+                                2*np.pi*np.cross(lat.a3,lat.a1)/V,
+                                2*np.pi*np.cross(lat.a1,lat.a2)/V]
+    else:
+        a3=np.array([0,0,10])
+        
+        if len(lat.a1)==2:
+            print()
+            a1=np.array(list(lat.a1)+[0])
+            a2=np.array(list(lat.a2)+[0])
+        else:
+            a1=lat.a1
+            a2=lat.a2
+
+
+        V=np.dot(a1,np.cross(a2,a3))
+        reciprocal_vectors_list=[2*np.pi*np.cross(a2,a3)/V,
+                                2*np.pi*np.cross(a3,a1)/V,
+                                2*np.pi*np.cross(a1,a2)/V]
+
+    return reciprocal_vectors_list
 
 class Model:
 
@@ -28,15 +52,13 @@ class Model:
 
         if self.space in ["k", "reciprocal"]:
 
-            a1 = np.asarray(lattice.a1, dtype=float)
-            a2 = np.asarray(lattice.a2, dtype=float)
 
-            A = np.column_stack((a1, a2))
+            self.reciprocal_vectors=reciprocal_vectors_calc(self.lattice)
 
-            B = 2 * np.pi * np.linalg.inv(A).T
-
-            self.b1 = B[:, 0]
-            self.b2 = B[:, 1]
+            self.b1 = self.reciprocal_vectors[0]
+            self.b2 = self.reciprocal_vectors[1]
+            self.b3 = self.reciprocal_vectors[2]
+            
 
             self.k_grid=k_grid_calc([self.b1,self.b2],n1,n2)
 

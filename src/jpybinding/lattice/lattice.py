@@ -3,11 +3,16 @@ import matplotlib.pyplot as plt
 
 class Lattice:
 
-    def __init__(self, a1, a2):
+    def __init__(self, a1, a2,a3=None):
 
-        self.a1 = list(a1)
-        self.a2 = list(a2)
-
+        self.a1 = np.asarray(list(a1))
+        self.a2 = np.asarray(list(a2))
+        
+        if a3 is not None:
+            self.a3 = np.asarray(list(a3))
+        else:
+            self.a3=None
+        
         self.sublattices = []
         self.hoppings = []
 
@@ -50,10 +55,12 @@ class Lattice:
 
             if onsite is not None:
                 self.sub_index_orb[name]=[]
-                for i in range(onsite.shape[0]):
+                if np.isscalar(onsite):
+                    onsite = np.asarray([onsite])
+                for i in range(np.asarray(onsite).shape[0]):
                     self.sub_index_orb[name].append(sub_index)
                     sub_index+=1
-                onsite = np.asarray(onsite)
+                onsite = np.asarray(onsite).astype(np.complex128)
 
             else:
                 self.sub_index_orb[name] = [sub_index]
@@ -95,9 +102,8 @@ class Lattice:
                 "relative_index": list(relative_index),
                 "from": from_name,
                 "to": to_name,
-                "energy": energy
+                "energy": np.asarray(energy).astype(np.complex128)
             })
-            print(from_name)
 
         return self
     
@@ -116,7 +122,10 @@ class Lattice:
         ## Sublattices
 
         for i in range(len(self.sublattices)):
-            x, y = self.sublattices[i]["position"]
+            if len(self.sublattices[i]["position"])==2:
+                x, y = self.sublattices[i]["position"]
+            elif len(self.sublattices[i]["position"])==3:
+                x, y,_ = self.sublattices[i]["position"]
             plt.scatter(x, y,s=1000)
             plt.text(x,y,self.sublattices[i]["name"],fontsize=12,ha='center',va='center',bbox=dict(facecolor="lightgray",alpha=0.6,edgecolor="none",boxstyle="round,pad=0.2"))
 
