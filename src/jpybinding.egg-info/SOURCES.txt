@@ -9,5 +9,7 @@ src/jpybinding/lattice/__init__.py
 src/jpybinding/lattice/lattice.py
 src/jpybinding/model/__init__.py
 src/jpybinding/model/model.py
+src/jpybinding/repository/__init__.py
+src/jpybinding/repository/repository.py
 src/jpybinding/solver/__init__.py
 src/jpybinding/solver/solver.py

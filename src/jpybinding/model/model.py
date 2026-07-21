@@ -138,7 +138,8 @@ class Model:
         
 
     
-    def hamiltonian(self,auto_conjugate=True):
+
+    def hamiltonian(self):
 
         N = self.n1 * self.n2 * self.lattice.norbs
 
@@ -224,17 +225,16 @@ class Model:
                     for i, oi in enumerate(from_inds):
                         for j, oj in enumerate(to_inds):
 
-                                
-                            H_entries.append((offset2+oj, offset1+oi, t[j,i]))
+                            H_entries.append((offset1+oi, offset2+oj, t[i,j]))
+                            Dx_entries.append((offset1 + oi,offset2 + oj,  dr[0]))
+                            Dy_entries.append((offset1 + oi,offset2 + oj,  dr[1]))
 
-                            Dx_entries.append((offset2 + oj, offset1 + oi,  dr[0]))
+                            H_entries.append((offset2+oj, offset1+oi, t[i,j].conjugate()))
+                            Dx_entries.append((offset2 + oj,offset1 + oi,  -dr[0]))
+                            Dy_entries.append((offset2 + oj,offset1 + oi,  -dr[1]))
 
-                            Dy_entries.append((offset2 + oj, offset1 + oi,  dr[1]))
                             
-                            if auto_conjugate is True:
-                                H_entries.append(( offset1+oi,offset2+oj, t[j,i].conjugate()))
-                                Dx_entries.append((offset1 + oi, offset2 + oj, -dr[0]))
-                                Dy_entries.append((offset1 + oi, offset2 + oj, -dr[1]))
+
 
 
 
@@ -253,7 +253,6 @@ class Model:
         Dy = build_csr(Dy_entries)
 
         return H, S, Omega, Dx, Dy
-
 
 
     
