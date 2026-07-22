@@ -43,7 +43,7 @@ def reciprocal_vectors_calc(lat):
 
 class Model:
 
-    def __init__(self, lattice, space="real",n1=None, n2=None):
+    def __init__(self, lattice, n1=None, n2=None,space="reciprocal"):
 
         self.lattice = lattice
         self.n1=n1
@@ -251,6 +251,13 @@ class Model:
         Dx = build_csr(Dx_entries)
 
         Dy = build_csr(Dy_entries)
+
+        print('Number of unit cells : '+str(self.n1)+' x '+str(self.n2 )+' = '+str(self.n1*self.n2))
+        print('NUmber of orbitals in each unit cell : '+str(self.lattice.norbs))
+        print('H : '+str(H.shape))
+        print('Dx shape : '+str(Dx.shape))
+        print('Dy shape : '+str(Dy.shape))
+        print('Size of H : '+str(((H.data.nbytes +H.indices.nbytes +H.indptr.nbytes)) / (1024**2))+' Mb')
 
         return H, S, Omega, Dx, Dy
 
