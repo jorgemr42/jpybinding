@@ -156,6 +156,10 @@ class Model:
         # ----------------------------------------------------
         # Onsites + orbital positions
         # ----------------------------------------------------
+
+        index_list = [[] for _ in range(self.lattice.norbs)]
+
+
         for ix in range(self.n1):
             for iy in range(self.n2):
 
@@ -173,7 +177,11 @@ class Model:
                         onsite = onsite.reshape((1, 1))
 
                     for i, oi in enumerate(inds):
+                        
                         S[offset + oi] = pos
+
+                        index_list[oi].append(offset + oi)
+
                         for j, oj in enumerate(inds):
                             H_entries.append((offset + oi,offset + oj,onsite[i, j]))
     
@@ -205,19 +213,16 @@ class Model:
                         t = t.reshape((1, 1))
 
                     sub_from = self.lattice.sublattices[
-                        self.lattice.sub_index_sml[hop["from"]]
-                    ]
+                        self.lattice.sub_index_sml[hop["from"]]]
                     sub_to = self.lattice.sublattices[
-                        self.lattice.sub_index_sml[hop["to"]]
-                    ]
+                        self.lattice.sub_index_sml[hop["to"]]]
 
                     r_from = Ri + np.asarray(sub_from["position"], dtype=float)
                     r_to = (
                         Ri
                         + dx * self.lattice.a1
                         + dy * self.lattice.a2
-                        + np.asarray(sub_to["position"], dtype=float)
-                    )
+                        + np.asarray(sub_to["position"], dtype=float))
 
                     dr = r_to - r_from
 
@@ -258,6 +263,8 @@ class Model:
         print('Dx shape : '+str(Dx.shape))
         print('Dy shape : '+str(Dy.shape))
         print('Size of H : '+str(((H.data.nbytes +H.indices.nbytes +H.indptr.nbytes)) / (1024**2))+' Mb')
+
+        self.index_list=index_list
 
         return H, S, Omega, Dx, Dy
 

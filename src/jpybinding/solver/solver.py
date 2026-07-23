@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm 
 
 
-plt.rcParams['text.usetex'] = True
-plt.rcParams['font.family'] = 'serif'
-plt.rcParams['font.serif'] = ['Computer Modern']
+# plt.rcParams['text.usetex'] = True
+# plt.rcParams['font.family'] = 'serif'
+# plt.rcParams['font.serif'] = ['Computer Modern']
 
 
 def FD(Temp,mu,E):
