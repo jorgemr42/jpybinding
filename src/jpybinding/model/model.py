@@ -158,7 +158,7 @@ class Model:
         # ----------------------------------------------------
 
         index_list = [[] for _ in range(self.lattice.norbs)]
-
+        index_atoms=[]
 
         for ix in range(self.n1):
             for iy in range(self.n2):
@@ -176,11 +176,16 @@ class Model:
                     if onsite.ndim == 0 or onsite.ndim == 1 :
                         onsite = onsite.reshape((1, 1))
 
+
+
                     for i, oi in enumerate(inds):
+
                         
                         S[offset + oi] = pos
 
                         index_list[oi].append(offset + oi)
+                        index_atoms.append(self.lattice.sub_index_sml[sub["name"]])
+
 
                         for j, oj in enumerate(inds):
                             H_entries.append((offset + oi,offset + oj,onsite[i, j]))
@@ -265,6 +270,7 @@ class Model:
         print('Size of H : '+str(((H.data.nbytes +H.indices.nbytes +H.indptr.nbytes)) / (1024**2))+' Mb')
 
         self.index_list=index_list
+        self.index_atoms=np.array(index_atoms)
 
         return H, S, Omega, Dx, Dy
 
