@@ -271,8 +271,11 @@ class Model:
 
         self.index_list=index_list
         self.index_atoms=np.array(index_atoms)
-
-        return H, S, Omega, Dx, Dy
+        self.H=H
+        self.Dx=Dx
+        self.Dy=Dy
+        self.S=S
+        return 
 
 
     
