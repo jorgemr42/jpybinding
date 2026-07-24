@@ -458,6 +458,7 @@ def lattice_square_bipartite_SK_SOC(m=0,Es=3.2,Ep=-0.5,Vsss=-0.5,Vsps=0.5,Vpps=0
     d = 2  # [A] unit cell length
     pos_A=np.array([0, 0, 0])
     pos_B=np.array([d/2, d/2,0])
+
     a1=np.array([d, 0, 0])
     a2=np.array([0, d, 0])
     onsites=np.diag([Es,Ep,Ep,Ep])
@@ -488,7 +489,7 @@ def lattice_square_bipartite_SK_SOC(m=0,Es=3.2,Ep=-0.5,Vsss=-0.5,Vsps=0.5,Vpps=0
         ([0, 1], 'B', 'B', np.kron(Slater_Koaster_s_px_py_pz((0*a1+1*a2)+pos_B-pos_B,Vsss,Vsps,Vpps,Vppp),np.eye(2))),
         ## Different lattice
         ([0, 0], 'A', 'B',  np.kron(delta*Slater_Koaster_s_px_py_pz((+0*a1+0*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp),np.eye(2))),
-        ([1, 1], 'A', 'B',  np.kron(delta*Slater_Koaster_s_px_py_pz((+1*a1+1*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp),np.eye(2))),
+        ([-1, -1], 'A', 'B',  np.kron(delta*Slater_Koaster_s_px_py_pz((+1*a1+1*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp),np.eye(2))),
         ([-1, 0], 'A', 'B', np.kron(delta*Slater_Koaster_s_px_py_pz((-1*a1+0*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp),np.eye(2))),
         ([0, -1], 'A', 'B', np.kron(delta*Slater_Koaster_s_px_py_pz((+0*a1-1*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp),np.eye(2))),
         

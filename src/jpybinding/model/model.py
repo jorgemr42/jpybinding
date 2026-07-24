@@ -275,6 +275,7 @@ class Model:
         self.Dx=Dx
         self.Dy=Dy
         self.S=S
+        self.Omega=Omega
         return 
 
 
