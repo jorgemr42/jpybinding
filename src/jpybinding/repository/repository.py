@@ -448,7 +448,7 @@ def lattice_square_SK_SOC(Es=3.2,Ep=-0.5,Vsss=-0.5,Vsps=0.5,Vpps=0.5,Vppp=-0.2,l
     return lattice
 
 
-def lattice_square_bipartite_SK_SOC(m=0,Es=3.2,Ep=-0.5,Vsss=-0.5,Vsps=0.5,Vpps=0.5,Vppp=-0.2,lambda_SOC=0.1,delta=0.5):
+def lattice_square_bipartite_SK_SOC(m=0,Es=3.2,Ep=-0.5,Vsss=-0.5,Vsps=0.5,Vpps=0.5,Vppp=-0.2,lambda_SOC=0.1,delta=0.5,B=0):
     """                                
     Default parameters are extracted from : https://doi.org/10.1103/PhysRevLett.121.086602 (and match them with some tatiana paper)
 
@@ -477,8 +477,8 @@ def lattice_square_bipartite_SK_SOC(m=0,Es=3.2,Ep=-0.5,Vsss=-0.5,Vsps=0.5,Vpps=0
     # create a simple 2D lattice with vectors a1 and a2
     lattice = jpb.Lattice(a1, a2)
     lattice.add_sublattices(
-        ('A', pos_A ,m*np.kron(np.eye(4),np.eye(2))+np.kron(onsites,np.eye(2))+L_S),  # add an atom called 'A' at position [0, 0]
-        ('B', pos_B ,-m*np.kron(np.eye(4),np.eye(2))+np.kron(onsites,np.eye(2))+L_S),  # add an atom called 'A' at position [0, 0]
+        ('A', pos_A ,m*np.kron(np.eye(4),np.eye(2))+np.kron(onsites,np.eye(2))+L_S+np.kron(np.eye(4),B*np.array([[1,0],[0,-1]]))),  # add an atom called 'A' at position [0, 0]
+        ('B', pos_B ,-m*np.kron(np.eye(4),np.eye(2))+np.kron(onsites,np.eye(2))+L_S+np.kron(np.eye(4),B*np.array([[1,0],[0,-1]]))),  # add an atom called 'A' at position [0, 0]
     )
     lattice.add_hoppings(
         # (relative_index, from_sublattice, to_sublattice, energy)
