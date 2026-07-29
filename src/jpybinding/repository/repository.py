@@ -111,40 +111,40 @@ def attice_Haldane(t=-2.7,m=0,t2=2/(3*np.sqrt(3))):
 
     return lat
 
-def lattice_kane_mele(t=-2.7,m=0,lambda_I=- 1/(3*np.sqrt(3)) ,Bz=0):
+# def lattice_kane_mele(t=-2.7,m=0,lambda_I=- 1/(3*np.sqrt(3)) ,Bz=0):
     
-    a = 0.24595   # [nm] unit cell length
-    a_cc = 0.142  # [nm] carbon-carbon distance
+#     a = 0.24595   # [nm] unit cell length
+#     a_cc = 0.142  # [nm] carbon-carbon distance
     
-    sz=np.array([[1,0],[0,-1]])
+#     sz=np.array([[1,0],[0,-1]])
 
-    lat = jpb.Lattice(
-        a1=[a, 0],
-        a2=[a/2, a/2 * np.sqrt(3)]
-    )
+#     lat = jpb.Lattice(
+#         a1=[a, 0],
+#         a2=[a/2, a/2 * np.sqrt(3)]
+#     )
 
-    lat.add_sublattices(
-        # name and position
-        ('A', [0, -a_cc/2],-m*np.array([[1,0],[0,1]])+np.array([[Bz,0],[0,-Bz]])),
-        ('B', [0,  a_cc/2],m*np.array([[1,0],[0,1]])+np.array([[Bz,0],[0,-Bz]]))
-    )
+#     lat.add_sublattices(
+#         # name and position
+#         ('A', [0, -a_cc/2],-m*np.array([[1,0],[0,1]])+np.array([[Bz,0],[0,-Bz]])),
+#         ('B', [0,  a_cc/2],m*np.array([[1,0],[0,1]])+np.array([[Bz,0],[0,-Bz]]))
+#     )
 
-    lat.add_hoppings(
-        # inside the main cell
-        ([0,  0], 'A', 'B', t*np.array([[1,0],[0,1]])),
-        # between neighboring cells
-        ([1, -1], 'A', 'B', t*np.array([[1,0],[0,1]])),
-        ([0, -1], 'A', 'B', t*np.array([[1,0],[0,1]])),
-        ([1, 0], 'A', 'A', lambda_I * 1j*sz),
-        ([0, -1], 'A', 'A', lambda_I * 1j*sz),
-        ([-1, 1], 'A', 'A', lambda_I * 1j*sz),
+#     lat.add_hoppings(
+#         # inside the main cell
+#         ([0,  0], 'A', 'B', t*np.array([[1,0],[0,1]])),
+#         # between neighboring cells
+#         ([1, -1], 'A', 'B', t*np.array([[1,0],[0,1]])),
+#         ([0, -1], 'A', 'B', t*np.array([[1,0],[0,1]])),
+#         ([1, 0], 'A', 'A', lambda_I * 1j*sz),
+#         ([0, -1], 'A', 'A', lambda_I * 1j*sz),
+#         ([-1, 1], 'A', 'A', lambda_I * 1j*sz),
 
-        ([1, 0], 'B', 'B', lambda_I * -1j*sz),
-        ([0, -1], 'B', 'B', lambda_I * -1j*sz),
-        ([-1, 1], 'B', 'B', lambda_I * -1j*sz)
-    )
+#         ([1, 0], 'B', 'B', lambda_I * -1j*sz),
+#         ([0, -1], 'B', 'B', lambda_I * -1j*sz),
+#         ([-1, 1], 'B', 'B', lambda_I * -1j*sz)
+#     )
 
-    return lat
+#     return lat
 
 
 
@@ -246,11 +246,10 @@ def lattice_bismuthene_SOC_4atoms(Vpps=1.815,Vppp=-0.315,m=0.2,lambda_i=0.435):
     return lat
 
 
-def lattice_kane_mele(lambda_I=- 1/(3*np.sqrt(3)),m=0,Bz=0 ):
+def lattice_kane_mele(t=-2.7,lambda_I=- 1/(3*np.sqrt(3)),m=0,Bz=0 ):
 
     a = 0.24595   # [nm] unit cell length
     a_cc = 0.142  # [nm] carbon-carbon distance
-    t = -2.7      # [eV] nearest neighbour hopping
 
 
     sz=np.array([[1,0],[0,-1]])
