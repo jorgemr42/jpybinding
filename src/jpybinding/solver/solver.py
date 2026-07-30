@@ -375,6 +375,50 @@ class Solver:
             return prob_mat
 
         
+    def calc_g_k_light2(self,k_point,light_params):
+        Hk,Vk1,Vk2=self.H_k_1_and_V_k_1(k_point)
+
+
+        g=light_params['A0']*(light_params['pol'][0]*Vk1+light_params['pol'][1]*Vk2)
+        return g
+
+
+    def prob_calculation_grid_light(self,light_params):
+
+            
+
+            ene_mat=np.zeros((self.model.n1*self.model.n2,self.model.lattice.norbs),dtype=np.float64)
+            vec_mat=np.zeros((self.model.n1*self.model.n2,self.model.lattice.norbs,self.model.lattice.norbs),dtype=np.complex128)
+            g_mat=np.zeros((self.model.n1*self.model.n2,self.model.lattice.norbs,self.model.lattice.norbs),dtype=np.complex128)
+        
+            for i in range(len(self.model.k_grid[:,0])):
+                Hk=self.H_k_1(self.model.k_grid[i,:])
+                ene_mat[i,:],vec_mat[i,:]=np.linalg.eigh(Hk)
+                g_mat[i,:,:]=self.calc_g_k_light2(self,self.model.k_grid[i,:],light_params)
+
+
+
+
+            self.ene=ene_mat
+            self.vec=vec_mat
+        
+            prob_mat=np.zeros((len(self.model.k_grid[:,0]),self.model.lattice.norbs,self.model.lattice.norbs),dtype=np.float64)
+            for i in range(len(self.model.k_grid[:,0])):
+                for j in range(self.model.lattice.norbs):
+                    for k in range(self.model.lattice.norbs):
+                        if j!=k:
+                            if light_params['omega'] is not None:
+                                if np.abs(np.abs((ene_mat[i,j]-ene_mat[i,k]))-light_params['omega']) < 0.1:
+                                    prob_mat[i,j,k]=np.abs(np.vdot(vec_mat[i,:,j],(g_mat[i,:,:]@vec_mat[i,:,k])))**2
+                            else:
+                                prob_mat[i,j,k]=np.abs(np.vdot(vec_mat[i,:,j],(g_mat[i,:,:]@vec_mat[i,:,k])))**2
+
+            return prob_mat
+
+        
+
+
+
 
         
 
