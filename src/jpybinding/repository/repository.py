@@ -178,7 +178,7 @@ def Rashba(e,lambda_r):
 
 
 
-def lattice_bismuthene_SOC_2atoms(Vpps=1.815,Vppp=-0.315,m=0.2,lambda_i=0.435):
+def lattice_bismuthene_SOC_2atoms(Vpps=1.815,Vppp=-0.315,m=0.2,lambda_i=0.435,Bz=0):
     a = 0.24595   # [nm] unit cell length
     a_cc = 0.142  # [nm] carbon-carbon distance
     
@@ -196,8 +196,8 @@ def lattice_bismuthene_SOC_2atoms(Vpps=1.815,Vppp=-0.315,m=0.2,lambda_i=0.435):
 
     lat = jpb.Lattice(a1,a2)
 
-    lat.add_sublattices(('A', [0, -a_cc/2],0.5*m*np.eye(4)+lambda_i*np.kron(Lz,Sz)),
-                        ('B', [0,  a_cc/2],-0.5*m*np.eye(4)+lambda_i*np.kron(Lz,Sz)))
+    lat.add_sublattices(('A', [0, -a_cc/2],0.5*m*np.eye(4)+lambda_i*np.kron(Lz,Sz)+Bz*np.kron(np.eye(2),np.array([[1,0],[0,-1]]))),
+                        ('B', [0,  a_cc/2],-0.5*m*np.eye(4)+lambda_i*np.kron(Lz,Sz)+Bz*np.kron(np.eye(2),np.array([[1,0],[0,-1]]))))
     lat.add_hoppings(
         # inside the main cell
         ([0,  0], 'A', 'B',np.kron(Slater_Koaster(e1,Vpps,Vppp),np.eye(2))),
