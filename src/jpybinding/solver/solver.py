@@ -268,11 +268,14 @@ class Solver:
         return sigma_sur_xx,sigma_sur_xy,sigma_sea_xy
 
 
-    def calc_g_k(self,k_point,phonon_params):
-        
+    def calc_g_k_phonons(self,k_point,phonon_params):
+
+        if np.sum(phonon_params['G'])==0.0 :
+            raise Warning('The fact that G is different from 0 is not implemented in the funtion that computes the grid and you have to be carefull with the periodicity and the creation of the 1BZ')
+            
 
         
-        Hk=np.zeros((self.model.lattice.norbs,self.model.lattice.norbs),dtype=complex)
+        g=np.zeros((self.model.lattice.norbs,self.model.lattice.norbs),dtype=complex)
 
         
         for hop in self.model.lattice.hoppings:
@@ -284,13 +287,9 @@ class Solver:
             R = (hop['relative_index'][0] * self.model.lattice.a1 +
                 hop['relative_index'][1] * self.model.lattice.a2)
 
-            r_from = self.model.lattice.sublattices[
-                self.model.lattice.sub_index_sml[hop['from']]
-            ]['position']
+            r_from = self.model.lattice.sublattices[self.model.lattice.sub_index_sml[hop['from']]]['position']
 
-            r_to = self.model.lattice.sublattices[
-                self.model.lattice.sub_index_sml[hop['to']]
-            ]['position']
+            r_to = self.model.lattice.sublattices[self.model.lattice.sub_index_sml[hop['to']]]['position']
             
 
 
@@ -298,132 +297,62 @@ class Solver:
 
             pol_term=phonon_params['pol_dic'][hop['from']]-np.exp(-1j*np.dot(phonon_params['G'],dist))*phonon_params['pol_dic'][hop['to']]
 
-            value=-hop['energy']*np.exp(-1j*(np.dot(k_point,dist)))*phonon_params['gamma_1']*np.dot(dist/np.linalg.norm(dist),pol_term)
-
-            Hk[np.ix_(rows, cols)] += value
+            value=hop['energy']*np.exp(1j*(np.dot(k_point,dist)))*phonon_params['gamma_1']*np.dot(dist/np.linalg.norm(dist),pol_term)
 
 
+            g[np.ix_(rows, cols)] += value
 
-        return Hk
+            dist2 = -dist
 
-    def prob_calculation_grid(self,phonon_params):
+            pol_term2=phonon_params['pol_dic'][hop['to']]-np.exp(-1j*np.dot(phonon_params['G'],dist2))*phonon_params['pol_dic'][hop['from']]
+
+            value2=hop['energy'].conj().T*np.exp(1j*(np.dot(k_point,dist2)))*phonon_params['gamma_1']*np.dot(dist2/np.linalg.norm(dist2),pol_term2)
+
+            g[np.ix_(cols, rows)] += value2
+
+
+        return g
+
+    
+    def calc_g_k_light(self,k_point,light_params):
+        _,Vk1,Vk2=self.H_k_1_and_V_k_1(k_point)
+
+
+        g=light_params['A0']*(light_params['pol'][0]*Vk1+light_params['pol'][1]*Vk2)
+        return g
+    
+
+    def prob_calculation_grid(self,id='phonons',params=None):
 
         
 
         ene_mat=np.zeros((self.model.n1*self.model.n2,self.model.lattice.norbs),dtype=np.float64)
         vec_mat=np.zeros((self.model.n1*self.model.n2,self.model.lattice.norbs,self.model.lattice.norbs),dtype=np.complex128)
         g_mat=np.zeros((self.model.n1*self.model.n2,self.model.lattice.norbs,self.model.lattice.norbs),dtype=np.complex128)
-    
+
         for i in range(len(self.model.k_grid[:,0])):
             Hk=self.H_k_1(self.model.k_grid[i,:])
             ene_mat[i,:],vec_mat[i,:]=np.linalg.eigh(Hk)
-            g_mat[i,:,:]=self.calc_g_k(self,self.model.k_grid[i,:],phonon_params)
-
-
-
-
-
+            if id=='phonons':
+                g_mat[i,:,:]=self.calc_g_phonons_k(self,self.model.k_grid[i,:],params)
+            elif id=='light':
+                g_mat[i,:,:]=self.calc_g_ligth_k(self,self.model.k_grid[i,:],params)
+                
         self.ene=ene_mat
         self.vec=vec_mat
-     
-        print(phonon_params['omega'])
+        
         prob_mat=np.zeros((len(self.model.k_grid[:,0]),self.model.lattice.norbs,self.model.lattice.norbs),dtype=np.float64)
         for i in range(len(self.model.k_grid[:,0])):
             for j in range(self.model.lattice.norbs):
                 for k in range(self.model.lattice.norbs):
                     if j!=k:
-                        if phonon_params['omega'] is not None:
-                            if np.abs(np.abs((ene_mat[i,j]-ene_mat[i,k]))-phonon_params['omega']) < 0.1:
+                        if params['omega'] is not None:
+                            if np.abs(np.abs((ene_mat[i,j]-ene_mat[i,k]))-params['omega']) < 0.1:
                                 prob_mat[i,j,k]=np.abs(np.vdot(vec_mat[i,:,j],(g_mat[i,:,:]@vec_mat[i,:,k])))**2
                         else:
                             prob_mat[i,j,k]=np.abs(np.vdot(vec_mat[i,:,j],(g_mat[i,:,:]@vec_mat[i,:,k])))**2
 
         return prob_mat
-    
-    def prob_calculation_path(self,phonon_params,k_points, k_points_per_segment=100,k_points_labels=None):
-
-            k_path=self.model.make_k_path(k_points, k_points_per_segment, endpoint=True)
-            
-
-            ene_mat=np.zeros((len(k_path[:,0]),self.model.lattice.norbs),dtype=np.float64)
-            vec_mat=np.zeros((len(k_path[:,0]),self.model.lattice.norbs,self.model.lattice.norbs),dtype=np.complex128)
-            g_mat=np.zeros((len(k_path[:,0]),self.model.lattice.norbs,self.model.lattice.norbs),dtype=np.complex128)
-        
-            for i in range(len(k_path[:,0])):
-                Hk=self.H_k_1(k_path[i,:])
-                ene_mat[i,:],vec_mat[i,:]=np.linalg.eigh(Hk)
-                g_mat[i,:,:]=self.calc_g_k(self,k_path[i,:],phonon_params)
-
-
-
-
-
-            self.ene=ene_mat
-            self.vec=vec_mat
-        
-            prob_mat=np.zeros((len(k_path[:,0]),self.model.lattice.norbs,self.model.lattice.norbs),dtype=np.float64)
-            for i in range(len(k_path[:,0])):
-                for j in range(self.model.lattice.norbs):
-                    for k in range(self.model.lattice.norbs):
-                        if j!=k:
-                            if phonon_params['omega'] is not None:
-                                if np.abs(np.abs((ene_mat[i,j]-ene_mat[i,k]))-phonon_params['omega']) < 0.1:
-                                    prob_mat[i,j,k]=np.abs(np.dot(vec_mat[i,:,j].conj(),(g_mat[i,:,:]@vec_mat[i,:,k])))**2
-                            else:
-                                prob_mat[i,j,k]=np.abs(np.dot(vec_mat[i,:,j].conj(),(g_mat[i,:,:]@vec_mat[i,:,k])))**2
-
-            return prob_mat
-
-        
-    def calc_g_k_light2(self,k_point,light_params):
-        Hk,Vk1,Vk2=self.H_k_1_and_V_k_1(k_point)
-
-
-        g=light_params['A0']*(light_params['pol'][0]*Vk1+light_params['pol'][1]*Vk2)
-        return g
-
-
-    def prob_calculation_grid_light(self,light_params):
-
-            
-
-            ene_mat=np.zeros((self.model.n1*self.model.n2,self.model.lattice.norbs),dtype=np.float64)
-            vec_mat=np.zeros((self.model.n1*self.model.n2,self.model.lattice.norbs,self.model.lattice.norbs),dtype=np.complex128)
-            g_mat=np.zeros((self.model.n1*self.model.n2,self.model.lattice.norbs,self.model.lattice.norbs),dtype=np.complex128)
-        
-            for i in range(len(self.model.k_grid[:,0])):
-                Hk=self.H_k_1(self.model.k_grid[i,:])
-                ene_mat[i,:],vec_mat[i,:]=np.linalg.eigh(Hk)
-                g_mat[i,:,:]=self.calc_g_k_light2(self,self.model.k_grid[i,:],light_params)
-
-
-
-
-            self.ene=ene_mat
-            self.vec=vec_mat
-        
-            prob_mat=np.zeros((len(self.model.k_grid[:,0]),self.model.lattice.norbs,self.model.lattice.norbs),dtype=np.float64)
-            for i in range(len(self.model.k_grid[:,0])):
-                for j in range(self.model.lattice.norbs):
-                    for k in range(self.model.lattice.norbs):
-                        if j!=k:
-                            if light_params['omega'] is not None:
-                                if np.abs(np.abs((ene_mat[i,j]-ene_mat[i,k]))-light_params['omega']) < 0.1:
-                                    prob_mat[i,j,k]=np.abs(np.vdot(vec_mat[i,:,j],(g_mat[i,:,:]@vec_mat[i,:,k])))**2
-                            else:
-                                prob_mat[i,j,k]=np.abs(np.vdot(vec_mat[i,:,j],(g_mat[i,:,:]@vec_mat[i,:,k])))**2
-
-            return prob_mat
-
-        
-
-
-
-
-        
-
-
-
 
 
 
