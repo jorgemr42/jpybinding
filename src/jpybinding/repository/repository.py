@@ -496,3 +496,312 @@ def lattice_square_bipartite_SK_SOC(m=0,Es=3.2,Ep=-0.5,Vsss=-0.5,Vsps=0.5,Vpps=0
     
 
     return lattice
+
+
+
+def Slater_Koaster_s_px_py_pz_d(e,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd):
+
+    print('Check if the d orbitals are well implemented with this sign, take a better reference ')
+
+    ### Vector normalization
+    e_norm=e/np.linalg.norm(e)
+
+    ### Building the matrix
+    t_mat=np.zeros((9,9),dtype=complex)
+    
+    ### s-s
+    t_mat[0,0]=Vsss
+
+    ### s-p
+    # s-px hopping
+    t_mat[0,1]=e_norm[0]*Vsps
+    t_mat[1,0]=-e_norm[0]*Vsps
+    # s-py hopping
+    t_mat[0,2]=e_norm[1]*Vsps
+    t_mat[2,0]=-e_norm[1]*Vsps
+    # s-pz hopping
+    t_mat[0,3]=e_norm[2]*Vsps
+    t_mat[3,0]=-e_norm[2]*Vsps
+            
+    ### p-p
+
+
+    # px-px hopping
+    t_mat[1,1]=(e_norm[0]**2*Vpps+(1-e_norm[0]**2)*Vppp)
+    # px-py hopping
+    t_mat[1,2]=e_norm[0]*e_norm[1]*(Vpps-Vppp)
+    # px-pz hopping
+    t_mat[1,3]=e_norm[0]*e_norm[2]*(Vpps-Vppp)
+
+    # py-py hopping
+    t_mat[2,2]=(e_norm[1]**2*Vpps+(1-e_norm[1]**2)*Vppp)
+    # py-px hopping
+    t_mat[2,1]=e_norm[0]*e_norm[1]*(Vpps-Vppp)
+    # py-pz hopping
+    t_mat[2,3]=e_norm[1]*e_norm[2]*(Vpps-Vppp)
+    
+    # pz-pz hopping
+    t_mat[3,3]=(e_norm[2]**2*Vpps+(1-e_norm[2]**2)*Vppp)
+    # pz-px hopping
+    t_mat[3,1]=e_norm[0]*e_norm[2]*(Vpps-Vppp)
+    # pz-py hopping
+    t_mat[3,2]=e_norm[1]*e_norm[2]*(Vpps-Vppp)
+
+    #l=e_norm[0]
+    #m=e_norm[1]
+    #n=e_norm[2]
+
+    # d-orbitals have the order: dxy (4), dyz (5), dzx (6), d_x2y2 (7), d_3z2r2 (8)
+
+    ### s-d
+
+    # s-dxy hopping
+    t_mat[0,4]=np.sqrt(3)*e_norm[0]*e_norm[1]*Vsds
+    t_mat[4,0]=t_mat[0,4]
+
+
+    # s-d_x2y2 hopping
+    t_mat[0,7]=0.5*np.sqrt(3)*(e_norm[0]**2-e_norm[1]**2)*Vsds
+    t_mat[7,0]=t_mat[0,7]
+
+
+    # s-d_3z2r2 hopping
+    t_mat[0,8]=(e_norm[2]**2-0.5*(e_norm[1]**2+e_norm[0]**2))*Vsds
+    t_mat[8,0]=t_mat[0,8]
+
+    ### p-d
+
+    # px-dxy hopping
+    t_mat[1,4]=np.sqrt(3)*e_norm[0]**2*e_norm[1]*Vpds+e_norm[1]*(1-2*e_norm[0]**2)*Vpdp
+    t_mat[4,1]=t_mat[1,4]
+
+    # px-dyz hopping
+    t_mat[1,5]=e_norm[0]*e_norm[1]*e_norm[2]*(np.sqrt(3)*Vpds-2*Vpdp)
+    t_mat[5,1]=t_mat[1,5]
+
+    # px-dzx hopping
+    t_mat[1,6]=np.sqrt(3)*e_norm[0]**2*e_norm[2]*Vpds+e_norm[2]*(1-2*e_norm[0]**2)*Vpdp
+    t_mat[6,1]=t_mat[1,6]
+
+    # px-d_x2y2 hopping
+    t_mat[1,7]=0.5*np.sqrt(3)*e_norm[0]*(e_norm[0]**2-e_norm[1]**2)*Vpds+e_norm[0]*(1-e_norm[0]**2+e_norm[1]**2)*Vpdp
+    t_mat[7,1]=t_mat[1,7]
+
+    # px-d_3z2r2 hopping
+    t_mat[1,8]=e_norm[0]*(e_norm[2]**2-0.5*(e_norm[1]**2+e_norm[0]**2))*Vpds-np.sqrt(3)*e_norm[0]*e_norm[2]**2*Vpdp
+    t_mat[8,1]=t_mat[1,8]
+
+    # py-dxy
+    t_mat[2,4] = np.sqrt(3)*e_norm[1]*e_norm[0]**2*Vpds + e_norm[0]*(1-2*e_norm[1]**2)*Vpdp
+    t_mat[4,2] = t_mat[2,4]
+
+    # py-dyz
+    t_mat[2,5] = np.sqrt(3)*e_norm[1]**2*e_norm[2]*Vpds + e_norm[2]*(1-2*e_norm[1]**2)*Vpdp
+    t_mat[5,2] = t_mat[2,5]
+
+    # py-dzx
+    t_mat[2,6] = np.sqrt(3)*e_norm[1]*e_norm[0]*e_norm[2]*Vpds - 2*e_norm[1]*e_norm[0]*e_norm[2]*Vpdp
+    t_mat[6,2] = t_mat[2,6]
+
+    # py-d_x2y2 hopping
+    t_mat[2,7]=0.5*np.sqrt(3)*e_norm[1]*(e_norm[0]**2-e_norm[1]**2)*Vpds-e_norm[1]*(1+e_norm[0]**2-e_norm[1]**2)*Vpdp
+    t_mat[7,2]=t_mat[2,7]
+
+    # py-d__3z2r2 hopping
+    t_mat[2,8]=e_norm[1]*(e_norm[2]**2-0.5*(e_norm[1]**2+e_norm[0]**2))*Vpds-np.sqrt(3)*e_norm[1]*e_norm[2]**2*Vpdp
+    t_mat[8,2]=t_mat[2,8] 
+
+
+    # pz-dxy
+    t_mat[3,4] = np.sqrt(3)*e_norm[2]*e_norm[1]*e_norm[0]*Vpds - 2*e_norm[2]*e_norm[1]*e_norm[0]*Vpdp
+    t_mat[4,3] = t_mat[3,4]
+
+    # pz-dyz
+    t_mat[3,5] = np.sqrt(3)*e_norm[2]*e_norm[1]**2*Vpds + e_norm[1]*(1-2*e_norm[2]**2)*Vpdp
+    t_mat[5,3] = t_mat[3,5]
+
+    # pz-dzx
+    t_mat[3,6] = np.sqrt(3)*e_norm[2]*e_norm[0]**2*Vpds + e_norm[0]*(1-2*e_norm[2]**2)*Vpdp
+    t_mat[6,3] = t_mat[3,6]
+
+
+    # pz-d_x2y2 hopping
+    t_mat[3,7]=0.5*np.sqrt(3)*e_norm[2]*(e_norm[0]**2-e_norm[1]**2)*Vpds-e_norm[2]*(e_norm[0]**2-e_norm[1]**2)*Vpdp
+    t_mat[7,3]=t_mat[3,7]
+  
+    # pz-d__3z2r2 hopping
+    t_mat[3,8]=e_norm[2]*(e_norm[2]**2-0.5*(e_norm[1]**2+e_norm[0]**2))*Vpds+np.sqrt(3)*e_norm[2]*(e_norm[0]**2+e_norm[1]**2)*Vpdp
+    t_mat[8,3]=t_mat[3,8] 
+
+        ### d-d
+
+    # d-orbitals have the order:
+    # dxy (4), dyz (5), dzx (6), d_x2y2 (7), d_3z2r2 (8)
+
+
+    # dxy-dxy hopping
+    t_mat[4,4] = (
+        3*e_norm[0]**2*e_norm[1]**2*Vdds
+        + (e_norm[0]**2 + e_norm[1]**2
+           - 4*e_norm[0]**2*e_norm[1]**2)*Vddp
+        + (e_norm[2]**2 + e_norm[0]**2*e_norm[1]**2)*Vddd
+    )
+
+
+    # dxy-dyz hopping
+    t_mat[4,5] = (
+        3*e_norm[0]*e_norm[1]**2*e_norm[2]*Vdds
+        + e_norm[0]*e_norm[2]*(1-4*e_norm[1]**2)*Vddp
+        + e_norm[0]*e_norm[2]*(e_norm[1]**2-1)*Vddd
+    )
+    t_mat[5,4] = t_mat[4,5]
+
+
+    # dxy-dzx hopping
+    t_mat[4,6] = (
+        3*e_norm[0]**2*e_norm[1]*e_norm[2]*Vdds
+        + e_norm[1]*e_norm[2]*(1-4*e_norm[0]**2)*Vddp
+        + e_norm[1]*e_norm[2]*(e_norm[0]**2-1)*Vddd
+    )
+    t_mat[6,4] = t_mat[4,6]
+
+
+    # dyz-dyz hopping
+    t_mat[5,5] = (
+        3*e_norm[1]**2*e_norm[2]**2*Vdds
+        + (e_norm[1]**2 + e_norm[2]**2
+           - 4*e_norm[1]**2*e_norm[2]**2)*Vddp
+        + (e_norm[0]**2 + e_norm[1]**2*e_norm[2]**2)*Vddd
+    )
+
+
+    # dyz-dzx hopping
+    t_mat[5,6] = (
+        3*e_norm[0]*e_norm[1]*e_norm[2]**2*Vdds
+        + e_norm[0]*e_norm[1]*(1-4*e_norm[2]**2)*Vddp
+        + e_norm[0]*e_norm[1]*(e_norm[2]**2-1)*Vddd
+    )
+    t_mat[6,5] = t_mat[5,6]
+
+
+    # dzx-dzx hopping
+    t_mat[6,6] = (
+        3*e_norm[0]**2*e_norm[2]**2*Vdds
+        + (e_norm[0]**2 + e_norm[2]**2
+           - 4*e_norm[0]**2*e_norm[2]**2)*Vddp
+        + (e_norm[1]**2 + e_norm[0]**2*e_norm[2]**2)*Vddd
+    )
+
+
+    # dxy-d_x2y2 hopping
+    t_mat[4,7] = (
+        1.5*e_norm[0]*e_norm[1]
+        *(e_norm[0]**2-e_norm[1]**2)*Vdds
+        + 2*e_norm[0]*e_norm[1]
+        *(e_norm[1]**2-e_norm[0]**2)*Vddp
+        + 0.5*e_norm[0]*e_norm[1]
+        *(e_norm[0]**2-e_norm[1]**2)*Vddd
+    )
+    t_mat[7,4] = t_mat[4,7]
+
+
+    # dyz-d_x2y2 hopping
+    t_mat[5,7] = (
+        1.5*e_norm[1]*e_norm[2]
+        *(e_norm[0]**2-e_norm[1]**2)*Vdds
+        - e_norm[1]*e_norm[2]
+        *(1+2*(e_norm[0]**2-e_norm[1]**2))*Vddp
+        + e_norm[1]*e_norm[2]
+        *(1+0.5*(e_norm[0]**2-e_norm[1]**2))*Vddd
+    )
+    t_mat[7,5] = t_mat[5,7]
+
+
+    # dzx-d_x2y2 hopping
+    t_mat[6,7] = (
+        1.5*e_norm[2]*e_norm[0]
+        *(e_norm[0]**2-e_norm[1]**2)*Vdds
+        + e_norm[2]*e_norm[0]
+        *(1-2*(e_norm[0]**2-e_norm[1]**2))*Vddp
+        - e_norm[2]*e_norm[0]
+        *(1-0.5*(e_norm[0]**2-e_norm[1]**2))*Vddd
+    )
+    t_mat[7,6] = t_mat[6,7]
+
+
+    # dxy-d_3z2r2 hopping
+    t_mat[4,8] = (
+        np.sqrt(3)*e_norm[0]*e_norm[1]
+        *(e_norm[2]**2
+          - 0.5*(e_norm[0]**2+e_norm[1]**2))*Vdds
+        - 2*np.sqrt(3)*e_norm[0]*e_norm[1]
+        *e_norm[2]**2*Vddp
+        + np.sqrt(3)*e_norm[0]*e_norm[1]
+        *(1+e_norm[2]**2)/2*Vddd
+    )
+    t_mat[8,4] = t_mat[4,8]
+
+
+    # dyz-d_3z2r2 hopping
+    t_mat[5,8] = (
+        np.sqrt(3)*e_norm[1]*e_norm[2]
+        *(e_norm[2]**2
+          - 0.5*(e_norm[0]**2+e_norm[1]**2))*Vdds
+        + np.sqrt(3)*e_norm[1]*e_norm[2]
+        *(e_norm[0]**2+e_norm[1]**2-e_norm[2]**2)*Vddp
+        - np.sqrt(3)*e_norm[1]*e_norm[2]
+        *(e_norm[0]**2+e_norm[1]**2)/2*Vddd
+    )
+    t_mat[8,5] = t_mat[5,8]
+
+
+    # dzx-d_3z2r2 hopping
+    t_mat[6,8] = (
+        np.sqrt(3)*e_norm[0]*e_norm[2]
+        *(e_norm[2]**2
+          - 0.5*(e_norm[0]**2+e_norm[1]**2))*Vdds
+        + np.sqrt(3)*e_norm[0]*e_norm[2]
+        *(e_norm[0]**2+e_norm[1]**2-e_norm[2]**2)*Vddp
+        - np.sqrt(3)*e_norm[0]*e_norm[2]
+        *(e_norm[0]**2+e_norm[1]**2)/2*Vddd
+    )
+    t_mat[8,6] = t_mat[6,8]
+
+
+    # d_x2y2-d_x2y2 hopping
+    t_mat[7,7] = (
+        1.5*(e_norm[0]**2-e_norm[1]**2)**2*Vdds
+        + (e_norm[0]**2+e_norm[1]**2
+           -(e_norm[0]**2-e_norm[1]**2)**2)*Vddp
+        + (e_norm[2]**2
+           +(e_norm[0]**2-e_norm[1]**2)**2/4)*Vddd
+    )
+
+
+    # d_x2y2-d_3z2r2 hopping
+    t_mat[7,8] = (
+        np.sqrt(3)/2
+        *(e_norm[0]**2-e_norm[1]**2)
+        *(e_norm[2]**2
+          - 0.5*(e_norm[0]**2+e_norm[1]**2))*Vdds
+        + np.sqrt(3)*e_norm[2]**2
+        *(e_norm[1]**2-e_norm[0]**2)*Vddp
+        + np.sqrt(3)/4
+        *(1+e_norm[2]**2)
+        *(e_norm[0]**2-e_norm[1]**2)*Vddd
+    )
+    t_mat[8,7] = t_mat[7,8]
+
+
+    # d_3z2r2-d_3z2r2 hopping
+    t_mat[8,8] = (
+        (e_norm[2]**2
+         - 0.5*(e_norm[0]**2+e_norm[1]**2))**2*Vdds
+        + 3*e_norm[2]**2
+        *(e_norm[0]**2+e_norm[1]**2)*Vddp
+        + 0.75
+        *(e_norm[0]**2+e_norm[1]**2)**2*Vddd
+    )
+
+
+    return t_mat
