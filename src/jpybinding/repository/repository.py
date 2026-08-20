@@ -501,7 +501,10 @@ def lattice_square_bipartite_SK_SOC(m=0,Es=3.2,Ep=-0.5,Vsss=-0.5,Vsps=0.5,Vpps=0
 
 def Slater_Koaster_s_px_py_pz_d(e,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd):
 
-    print('Check if the d orbitals are well implemented with this sign, take a better reference ')
+    """
+    Check https://link.aps.org/doi/10.1103/PhysRev.94.1498 for the matrix elements plus being aware of the minus sign in the conjugates where there is no square or odd number of e_norm.
+    
+    """
 
     ### Vector normalization
     e_norm=e/np.linalg.norm(e)
@@ -823,26 +826,35 @@ def lattice_square_bipartite_SK_d_SOC(m=0,Es=3.2,Ep=-0.5,Ed=0,Vsss=-0.5,Vsps=0.5
     a2=np.array([0, d, 0])
     onsites=np.diag([Es,Ep,Ep,Ep,Ed,Ed,Ed,Ed,Ed])
     # # SOC part
-    # Lx=np.array([[0,0,0,0],[0,0,0,0],[0,0,0,-1j],[0,0,1j,0]])
-    # Ly=np.array([[0,0,0,0],[0,0,0,1j],[0,0,0,0],[0,-1j,0,0]])
-    # Lz=np.array([[0,0,0,0],[0,0,-1j,0],[0,1j,0,0],[0,0,0,0]])
 
-    # Sx=0.5*np.array([[0,1],[1,0]])
-    # Sy=0.5*np.array([[0,-1j],[1j,0]])
-    # Sz=0.5*np.array([[1,0],[0,-1]])
-    # L_S=2*lambda_SOC*(np.kron(Lx,Sx)+np.kron(Ly,Sy)+np.kron(Lz,Sz))
+    Lp = [
+    np.array([[0,0,0],[0,0,-1j],[0,1j,0]]),
+    np.array([[0,0,1j],[0,0,0],[-1j,0,0]]),
+    np.array([[0,-1j,0],[1j,0,0],[0,0,0]])
+    ]
+
+    Ld = [
+        np.array([[0,0,1j,0,0],[0,0,0,1j,1j*np.sqrt(3)],[-1j,0,0,0,0],[0,-1j,0,0,0],[0,-1j*np.sqrt(3),0,0,0]]),
+        np.array([[0,-1j,0,0,0],[1j,0,0,0,0],[0,0,0,-1j,1j*np.sqrt(3)],[0,0,1j,0,0],[0,0,-1j*np.sqrt(3),0,0]]),
+        np.array([[0,0,0,2*1j,0],[0,0,-1j,0,0],[0,1j,0,0,0],[-2*1j,0,0,0,0],[0,0,0,0,0]])
+    ]
+
+    L=[sci.sparse.block_diag([np.array([[0]]),Lp[i],Ld[i]]).toarray() for i in range(3)]
+
+
+    Sx=0.5*np.array([[0,1],[1,0]])
+    Sy=0.5*np.array([[0,-1j],[1j,0]])
+    Sz=0.5*np.array([[1,0],[0,-1]])
+    L_S=2*lambda_SOC*(np.kron(L[0],Sx)+np.kron(L[1],Sy)+np.kron(L[2],Sz))
 
     
     
     # create a simple 2D lattice with vectors a1 and a2
     lattice = jpb.Lattice(a1, a2)
-    # lattice.add_sublattices(
-    #     ('A', pos_A ,m*np.kron(np.eye(4),np.eye(2))+np.kron(onsites,np.eye(2))+L_S+np.kron(np.eye(4),B*np.array([[1,0],[0,-1]]))),  # add an atom called 'A' at position [0, 0]
-    #     ('B', pos_B ,-m*np.kron(np.eye(4),np.eye(2))+np.kron(onsites,np.eye(2))+L_S+np.kron(np.eye(4),B*np.array([[1,0],[0,-1]]))),  # add an atom called 'A' at position [0, 0]
-    # )
+ 
     lattice.add_sublattices(
-        ('A', pos_A ,m*np.kron(np.eye(9),np.eye(2))+np.kron(onsites,np.eye(2))),  # add an atom called 'A' at position [0, 0]
-        ('B', pos_B ,-m*np.kron(np.eye(9),np.eye(2))+np.kron(onsites,np.eye(2))),  # add an atom called 'A' at position [0, 0]
+        ('A', pos_A ,m*np.kron(np.eye(9),np.eye(2))+np.kron(onsites,np.eye(2))+L_S+np.kron(np.eye(9),B*np.array([[1,0],[0,-1]]))),  # add an atom called 'A' at position [0, 0]
+        ('B', pos_B ,-m*np.kron(np.eye(9),np.eye(2))+np.kron(onsites,np.eye(2))+L_S+np.kron(np.eye(9),B*np.array([[1,0],[0,-1]]))),  # add an atom called 'A' at position [0, 0]
     )
     lattice.add_hoppings(
         # (relative_index, from_sublattice, to_sublattice, energy)
