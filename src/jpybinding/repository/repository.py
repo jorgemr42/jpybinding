@@ -573,67 +573,67 @@ def Slater_Koaster_s_px_py_pz_d(e,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,V
 
     # px-dxy hopping
     t_mat[1,4]=np.sqrt(3)*e_norm[0]**2*e_norm[1]*Vpds+e_norm[1]*(1-2*e_norm[0]**2)*Vpdp
-    t_mat[4,1]=t_mat[1,4]
+    t_mat[4,1]=-t_mat[1,4]
 
     # px-dyz hopping
     t_mat[1,5]=e_norm[0]*e_norm[1]*e_norm[2]*(np.sqrt(3)*Vpds-2*Vpdp)
-    t_mat[5,1]=t_mat[1,5]
+    t_mat[5,1]=-t_mat[1,5]
 
     # px-dzx hopping
     t_mat[1,6]=np.sqrt(3)*e_norm[0]**2*e_norm[2]*Vpds+e_norm[2]*(1-2*e_norm[0]**2)*Vpdp
-    t_mat[6,1]=t_mat[1,6]
+    t_mat[6,1]=-t_mat[1,6]
 
     # px-d_x2y2 hopping
     t_mat[1,7]=0.5*np.sqrt(3)*e_norm[0]*(e_norm[0]**2-e_norm[1]**2)*Vpds+e_norm[0]*(1-e_norm[0]**2+e_norm[1]**2)*Vpdp
-    t_mat[7,1]=t_mat[1,7]
+    t_mat[7,1]=-t_mat[1,7]
 
     # px-d_3z2r2 hopping
     t_mat[1,8]=e_norm[0]*(e_norm[2]**2-0.5*(e_norm[1]**2+e_norm[0]**2))*Vpds-np.sqrt(3)*e_norm[0]*e_norm[2]**2*Vpdp
-    t_mat[8,1]=t_mat[1,8]
+    t_mat[8,1]=-t_mat[1,8]
 
     # py-dxy
     t_mat[2,4] = np.sqrt(3)*e_norm[1]*e_norm[0]**2*Vpds + e_norm[0]*(1-2*e_norm[1]**2)*Vpdp
-    t_mat[4,2] = t_mat[2,4]
+    t_mat[4,2] = -t_mat[2,4]
 
     # py-dyz
     t_mat[2,5] = np.sqrt(3)*e_norm[1]**2*e_norm[2]*Vpds + e_norm[2]*(1-2*e_norm[1]**2)*Vpdp
-    t_mat[5,2] = t_mat[2,5]
+    t_mat[5,2] = -t_mat[2,5]
 
     # py-dzx
     t_mat[2,6] = np.sqrt(3)*e_norm[1]*e_norm[0]*e_norm[2]*Vpds - 2*e_norm[1]*e_norm[0]*e_norm[2]*Vpdp
-    t_mat[6,2] = t_mat[2,6]
+    t_mat[6,2] = -t_mat[2,6]
 
     # py-d_x2y2 hopping
     t_mat[2,7]=0.5*np.sqrt(3)*e_norm[1]*(e_norm[0]**2-e_norm[1]**2)*Vpds-e_norm[1]*(1+e_norm[0]**2-e_norm[1]**2)*Vpdp
-    t_mat[7,2]=t_mat[2,7]
+    t_mat[7,2]=-t_mat[2,7]
 
     # py-d__3z2r2 hopping
     t_mat[2,8]=e_norm[1]*(e_norm[2]**2-0.5*(e_norm[1]**2+e_norm[0]**2))*Vpds-np.sqrt(3)*e_norm[1]*e_norm[2]**2*Vpdp
-    t_mat[8,2]=t_mat[2,8] 
+    t_mat[8,2]=-t_mat[2,8] 
 
 
     # pz-dxy
     t_mat[3,4] = np.sqrt(3)*e_norm[2]*e_norm[1]*e_norm[0]*Vpds - 2*e_norm[2]*e_norm[1]*e_norm[0]*Vpdp
-    t_mat[4,3] = t_mat[3,4]
+    t_mat[4,3] = -t_mat[3,4]
 
     # pz-dyz
     t_mat[3,5] = np.sqrt(3)*e_norm[2]*e_norm[1]**2*Vpds + e_norm[1]*(1-2*e_norm[2]**2)*Vpdp
-    t_mat[5,3] = t_mat[3,5]
+    t_mat[5,3] = -t_mat[3,5]
 
     # pz-dzx
     t_mat[3,6] = np.sqrt(3)*e_norm[2]*e_norm[0]**2*Vpds + e_norm[0]*(1-2*e_norm[2]**2)*Vpdp
-    t_mat[6,3] = t_mat[3,6]
+    t_mat[6,3] = -t_mat[3,6]
 
 
     # pz-d_x2y2 hopping
     t_mat[3,7]=0.5*np.sqrt(3)*e_norm[2]*(e_norm[0]**2-e_norm[1]**2)*Vpds-e_norm[2]*(e_norm[0]**2-e_norm[1]**2)*Vpdp
-    t_mat[7,3]=t_mat[3,7]
+    t_mat[7,3]=-t_mat[3,7]
   
     # pz-d__3z2r2 hopping
     t_mat[3,8]=e_norm[2]*(e_norm[2]**2-0.5*(e_norm[1]**2+e_norm[0]**2))*Vpds+np.sqrt(3)*e_norm[2]*(e_norm[0]**2+e_norm[1]**2)*Vpdp
-    t_mat[8,3]=t_mat[3,8] 
+    t_mat[8,3]=-t_mat[3,8] 
 
-        ### d-d
+    ### d-d
 
     # d-orbitals have the order:
     # dxy (4), dyz (5), dzx (6), d_x2y2 (7), d_3z2r2 (8)
@@ -770,7 +770,7 @@ def Slater_Koaster_s_px_py_pz_d(e,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,V
 
     # d_x2y2-d_x2y2 hopping
     t_mat[7,7] = (
-        1.5*(e_norm[0]**2-e_norm[1]**2)**2*Vdds
+        0.75*(e_norm[0]**2-e_norm[1]**2)**2*Vdds
         + (e_norm[0]**2+e_norm[1]**2
            -(e_norm[0]**2-e_norm[1]**2)**2)*Vddp
         + (e_norm[2]**2
@@ -805,3 +805,59 @@ def Slater_Koaster_s_px_py_pz_d(e,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,V
 
 
     return t_mat
+
+
+
+def lattice_square_bipartite_SK_d_SOC(m=0,Es=3.2,Ep=-0.5,Ed=0,Vsss=-0.5,Vsps=0.5,Vpps=0.5,Vppp=-0.2,Vsds=0,Vpds=0,Vpdp=0,Vdds=0,Vddp=0,Vddd=0,lambda_SOC=0.1,delta=0.5,B=0):
+    """                                
+    Default parameters are extracted from : https://doi.org/10.1103/PhysRevLett.121.086602 (and match them with some tatiana paper)
+
+    """
+
+    
+    d = 2  # [A] unit cell length
+    pos_A=np.array([0, 0, 0])
+    pos_B=np.array([d/2, d/2,0])
+
+    a1=np.array([d, 0, 0])
+    a2=np.array([0, d, 0])
+    onsites=np.diag([Es,Ep,Ep,Ep,Ed,Ed,Ed,Ed,Ed])
+    # # SOC part
+    # Lx=np.array([[0,0,0,0],[0,0,0,0],[0,0,0,-1j],[0,0,1j,0]])
+    # Ly=np.array([[0,0,0,0],[0,0,0,1j],[0,0,0,0],[0,-1j,0,0]])
+    # Lz=np.array([[0,0,0,0],[0,0,-1j,0],[0,1j,0,0],[0,0,0,0]])
+
+    # Sx=0.5*np.array([[0,1],[1,0]])
+    # Sy=0.5*np.array([[0,-1j],[1j,0]])
+    # Sz=0.5*np.array([[1,0],[0,-1]])
+    # L_S=2*lambda_SOC*(np.kron(Lx,Sx)+np.kron(Ly,Sy)+np.kron(Lz,Sz))
+
+    
+    
+    # create a simple 2D lattice with vectors a1 and a2
+    lattice = jpb.Lattice(a1, a2)
+    # lattice.add_sublattices(
+    #     ('A', pos_A ,m*np.kron(np.eye(4),np.eye(2))+np.kron(onsites,np.eye(2))+L_S+np.kron(np.eye(4),B*np.array([[1,0],[0,-1]]))),  # add an atom called 'A' at position [0, 0]
+    #     ('B', pos_B ,-m*np.kron(np.eye(4),np.eye(2))+np.kron(onsites,np.eye(2))+L_S+np.kron(np.eye(4),B*np.array([[1,0],[0,-1]]))),  # add an atom called 'A' at position [0, 0]
+    # )
+    lattice.add_sublattices(
+        ('A', pos_A ,m*np.kron(np.eye(9),np.eye(2))+np.kron(onsites,np.eye(2))),  # add an atom called 'A' at position [0, 0]
+        ('B', pos_B ,-m*np.kron(np.eye(9),np.eye(2))+np.kron(onsites,np.eye(2))),  # add an atom called 'A' at position [0, 0]
+    )
+    lattice.add_hoppings(
+        # (relative_index, from_sublattice, to_sublattice, energy)
+        ## Same lattice
+        ([1, 0], 'A', 'A', np.kron(Slater_Koaster_s_px_py_pz_d((1*a1+0*a2)+pos_A-pos_A,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
+        ([0, 1], 'A', 'A', np.kron(Slater_Koaster_s_px_py_pz_d((0*a1+1*a2)+pos_A-pos_A,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))), 
+        ([1, 0], 'B', 'B', np.kron(Slater_Koaster_s_px_py_pz_d((1*a1+0*a2)+pos_B-pos_B,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
+        ([0, 1], 'B', 'B', np.kron(Slater_Koaster_s_px_py_pz_d((0*a1+1*a2)+pos_B-pos_B,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
+        ## Different lattice
+        ([0, 0], 'A', 'B',  np.kron(delta*Slater_Koaster_s_px_py_pz_d((+0*a1+0*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
+        ([-1, -1], 'A', 'B',  np.kron(delta*Slater_Koaster_s_px_py_pz_d((+1*a1+1*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
+        ([-1, 0], 'A', 'B', np.kron(delta*Slater_Koaster_s_px_py_pz_d((-1*a1+0*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
+        ([0, -1], 'A', 'B', np.kron(delta*Slater_Koaster_s_px_py_pz_d((+0*a1-1*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
+        
+ )
+    
+
+    return lattice
