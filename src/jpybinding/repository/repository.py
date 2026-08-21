@@ -814,8 +814,9 @@ def Slater_Koaster_s_px_py_pz_d(e,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,V
 def lattice_square_bipartite_SK_d_SOC(m=0,Es=3.2,Ep=-0.5,Ed=0,Vsss=-0.5,Vsps=0.5,Vpps=0.5,Vppp=-0.2,Vsds=0,Vpds=0,Vpdp=0,Vdds=0,Vddp=0,Vddd=0,lambda_SOC=0.1,delta=0.5,B=0):
     """                                
     Default parameters are extracted from : https://doi.org/10.1103/PhysRevLett.121.086602 (and match them with some tatiana paper)
-
+    The L matrices can be found in here : https://journals.aps.org/prb/pdf/10.1103/PhysRevB.98.214405
     """
+    # dxy (4), dyz (5), dzx (6), d_x2y2 (7), d_3z2r2 (8)
 
     
     d = 2  # [A] unit cell length
@@ -834,10 +835,25 @@ def lattice_square_bipartite_SK_d_SOC(m=0,Es=3.2,Ep=-0.5,Ed=0,Vsss=-0.5,Vsps=0.5
     ]
 
     Ld = [
-        np.array([[0,0,1j,0,0],[0,0,0,1j,1j*np.sqrt(3)],[-1j,0,0,0,0],[0,-1j,0,0,0],[0,-1j*np.sqrt(3),0,0,0]]),
-        np.array([[0,-1j,0,0,0],[1j,0,0,0,0],[0,0,0,-1j,1j*np.sqrt(3)],[0,0,1j,0,0],[0,0,-1j*np.sqrt(3),0,0]]),
-        np.array([[0,0,0,2*1j,0],[0,0,-1j,0,0],[0,1j,0,0,0],[-2*1j,0,0,0,0],[0,0,0,0,0]])
-    ]
+        np.array([
+            [0, 0, -1j, 0, 0],
+            [0, 0,  0, -1j, -1j*np.sqrt(3)],
+            [1j, 0, 0, 0, 0],
+            [0, 1j, 0, 0, 0],
+            [0, 1j*np.sqrt(3), 0, 0, 0]
+        ]),np.array([
+            [0,  1j, 0, 0, 0],
+            [-1j, 0, 0, 0, 0],
+            [0, 0, 0, -1j, 1j*np.sqrt(3)],
+            [0, 0, 1j, 0, 0],
+            [0, 0, -1j*np.sqrt(3), 0, 0]
+        ]),np.array([
+            [0, 0, 0,  2j, 0],
+            [0, 0, 1j,  0, 0],
+            [0, -1j, 0, 0, 0],
+            [-2j, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0]])]
+
 
     L=[sci.sparse.block_diag([np.array([[0]]),Lp[i],Ld[i]]).toarray() for i in range(3)]
 
