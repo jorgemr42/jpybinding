@@ -488,7 +488,7 @@ def lattice_square_bipartite_SK_SOC(m=0,Es=3.2,Ep=-0.5,Vsss=-0.5,Vsps=0.5,Vpps=0
         ([0, 1], 'B', 'B', np.kron(Slater_Koaster_s_px_py_pz((0*a1+1*a2)+pos_B-pos_B,Vsss,Vsps,Vpps,Vppp),np.eye(2))),
         ## Different lattice
         ([0, 0], 'A', 'B',  np.kron(delta*Slater_Koaster_s_px_py_pz((+0*a1+0*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp),np.eye(2))),
-        ([-1, -1], 'A', 'B',  np.kron(delta*Slater_Koaster_s_px_py_pz((+1*a1+1*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp),np.eye(2))),
+        ([-1, -1], 'A', 'B',  np.kron(delta*Slater_Koaster_s_px_py_pz((-1*a1-1*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp),np.eye(2))),
         ([-1, 0], 'A', 'B', np.kron(delta*Slater_Koaster_s_px_py_pz((-1*a1+0*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp),np.eye(2))),
         ([0, -1], 'A', 'B', np.kron(delta*Slater_Koaster_s_px_py_pz((+0*a1-1*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp),np.eye(2))),
         
@@ -881,7 +881,7 @@ def lattice_square_bipartite_SK_d_SOC(m=0,Es=3.2,Ep=-0.5,Ed=0,Vsss=-0.5,Vsps=0.5
         ([0, 1], 'B', 'B', np.kron(Slater_Koaster_s_px_py_pz_d((0*a1+1*a2)+pos_B-pos_B,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
         ## Different lattice
         ([0, 0], 'A', 'B',  np.kron(delta*Slater_Koaster_s_px_py_pz_d((+0*a1+0*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
-        ([-1, -1], 'A', 'B',  np.kron(delta*Slater_Koaster_s_px_py_pz_d((+1*a1+1*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
+        ([-1, -1], 'A', 'B',  np.kron(delta*Slater_Koaster_s_px_py_pz_d((-1*a1-1*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
         ([-1, 0], 'A', 'B', np.kron(delta*Slater_Koaster_s_px_py_pz_d((-1*a1+0*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
         ([0, -1], 'A', 'B', np.kron(delta*Slater_Koaster_s_px_py_pz_d((+0*a1-1*a2)+pos_B-pos_A,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
         
