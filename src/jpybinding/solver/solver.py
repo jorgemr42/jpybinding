@@ -97,8 +97,6 @@ class Solver:
                 self.model.lattice.sub_index_sml[hop['to']]
             ]['position']
             
-
-
             dist = np.asarray(r_from) - np.asarray(r_to) - np.asarray(R)
 
             value_h=hop['energy']*np.exp(1j*(np.dot(k_point,dist)))
@@ -230,10 +228,10 @@ class Solver:
         sigma_sur_xx=np.zeros(len(mu_vec),dtype=np.float64)
         sigma_sur_xy=np.zeros(len(mu_vec),dtype=np.float64)
         sigma_sea_xy=np.zeros(len(mu_vec),dtype=np.float64)
+        sigma_sea_xx=np.zeros(len(mu_vec),dtype=np.float64)
         
         for i in tqdm(range(len(self.model.k_grid))):
             H,Vx,Vy=self.H_k_1_and_V_k_1(self.model.k_grid[i])
-            
             ene_mat[i,:],vec_mat[i,:]=np.linalg.eigh(H)
 
             if operator is None:
@@ -246,6 +244,7 @@ class Solver:
                     term_sur_xx = np.real((np.vdot(vec_mat[i,:, n], Vx_O @ vec_mat[i,:, m,]) *np.vdot(vec_mat[i,:, m], Vx @ vec_mat[i,:, n])))
                     term_sur_xy = np.real((np.vdot(vec_mat[i,:, n], Vx_O @ vec_mat[i,:, m,]) *np.vdot(vec_mat[i,:, m], Vy @ vec_mat[i,:, n])))
                     term_sea_xy = np.imag((np.vdot(vec_mat[i,:, n], Vx_O @ vec_mat[i,:, m,]) *np.vdot(vec_mat[i,:, m], Vy @ vec_mat[i,:, n])))
+                    term_sea_xx = np.imag((np.vdot(vec_mat[i,:, n], Vx_O @ vec_mat[i,:, m,]) *np.vdot(vec_mat[i,:, m], Vx @ vec_mat[i,:, n])))
 
                     for mu in range(len(mu_vec)):
 
@@ -253,6 +252,7 @@ class Solver:
                         sigma_sur_xy[mu]+=broadening**2*term_sur_xy/(((mu_vec[mu]-ene_mat[i,n])**2+broadening**2)*((mu_vec[mu]-ene_mat[i,m])**2+broadening**2))
                         if n!=m:
                             sigma_sea_xy[mu]+=(FD(Temp,mu_vec[mu],ene_mat[i,n])-FD(Temp,mu_vec[mu],ene_mat[i,m]))*term_sea_xy/((ene_mat[i,n]-ene_mat[i,m])**2+broadening**2)
+                            sigma_sea_xx[mu]+=(FD(Temp,mu_vec[mu],ene_mat[i,n])-FD(Temp,mu_vec[mu],ene_mat[i,m]))*term_sea_xx/((ene_mat[i,n]-ene_mat[i,m])**2+broadening**2)
                         
         
         # For integration factors
@@ -262,10 +262,63 @@ class Solver:
         sigma_sur_xx *= 2*dk/(2*np.pi)**2
         sigma_sur_xy *= 2*dk/(2*np.pi)**2
         sigma_sea_xy *= 2*np.pi*dk/(2*np.pi)**2
+        sigma_sea_xx *= 2*np.pi*dk/(2*np.pi)**2
 
 
         
-        return sigma_sur_xx,sigma_sur_xy,sigma_sea_xy
+        return sigma_sur_xx,sigma_sea_xx,sigma_sur_xy,sigma_sea_xy
+    
+    def kubo_rotating(self,mu_vec,phi_vec,broadening=1e-9,Temp=0,operator=None):
+
+            
+            ene_mat=np.zeros((len(self.model.k_grid),self.model.lattice.norbs),dtype=np.float64)
+            vec_mat=np.zeros((len(self.model.k_grid),self.model.lattice.norbs,self.model.lattice.norbs),dtype=np.complex128)
+            sigma_sur_xx=np.zeros(len(phi_vec),len(mu_vec),dtype=np.float64)
+            sigma_sur_xy=np.zeros(len(phi_vec),len(mu_vec),dtype=np.float64)
+            sigma_sea_xy=np.zeros(len(phi_vec),len(mu_vec),dtype=np.float64)
+            sigma_sea_xx=np.zeros(len(phi_vec),len(mu_vec),dtype=np.float64)
+            
+            for i in tqdm(range(len(self.model.k_grid))):
+                H,Vx,Vy=self.H_k_1_and_V_k_1(self.model.k_grid[i])
+                ene_mat[i,:],vec_mat[i,:]=np.linalg.eigh(H)
+                for j in range(len(phi_vec)):
+                    Vx_rot=Vx*np.cos(phi_vec[j])+np.sin(phi_vec[j])*Vy
+                    Vy_rot=Vy*np.cos(phi_vec[j])-np.sin(phi_vec[j])*Vx
+                    if operator is None:
+
+                        Vx_O_rot=Vx_rot
+
+                    else:
+                        Vx_O_rot=Vx_rot@operator[j]+operator[j]@Vx_rot
+
+                    for n in range(self.model.lattice.norbs):
+                        for m in range(self.model.lattice.norbs):
+                            term_sur_xx = np.real((np.vdot(vec_mat[i,:, n], Vx_O_rot @ vec_mat[i,:, m,]) *np.vdot(vec_mat[i,:, m], Vx_rot @ vec_mat[i,:, n])))
+                            term_sur_xy = np.real((np.vdot(vec_mat[i,:, n], Vx_O_rot @ vec_mat[i,:, m,]) *np.vdot(vec_mat[i,:, m], Vy_rot @ vec_mat[i,:, n])))
+                            term_sea_xy = np.imag((np.vdot(vec_mat[i,:, n], Vx_O_rot @ vec_mat[i,:, m,]) *np.vdot(vec_mat[i,:, m], Vy_rot @ vec_mat[i,:, n])))
+                            term_sea_xx = np.imag((np.vdot(vec_mat[i,:, n], Vx_O_rot @ vec_mat[i,:, m,]) *np.vdot(vec_mat[i,:, m], Vx_rot @ vec_mat[i,:, n])))
+
+                            for mu in range(len(mu_vec)):
+
+                                sigma_sur_xx[j,mu]+=broadening**2*term_sur_xx/(((mu_vec[mu]-ene_mat[i,n])**2+broadening**2)*((mu_vec[mu]-ene_mat[i,m])**2+broadening**2))
+                                sigma_sur_xy[j,mu]+=broadening**2*term_sur_xy/(((mu_vec[mu]-ene_mat[i,n])**2+broadening**2)*((mu_vec[mu]-ene_mat[i,m])**2+broadening**2))
+                                if n!=m:
+                                    sigma_sea_xy[j,mu]+=(FD(Temp,mu_vec[mu],ene_mat[i,n])-FD(Temp,mu_vec[mu],ene_mat[i,m]))*term_sea_xy/((ene_mat[i,n]-ene_mat[i,m])**2+broadening**2)
+                                    sigma_sea_xx[j,mu]+=(FD(Temp,mu_vec[mu],ene_mat[i,n])-FD(Temp,mu_vec[mu],ene_mat[i,m]))*term_sea_xx/((ene_mat[i,n]-ene_mat[i,m])**2+broadening**2)
+                                
+            
+            # For integration factors
+            dk=abs(np.cross(self.model.b1, self.model.b2)[-1])/len(self.model.k_grid)
+
+
+            sigma_sur_xx *= 2*dk/(2*np.pi)**2
+            sigma_sur_xy *= 2*dk/(2*np.pi)**2
+            sigma_sea_xy *= 2*np.pi*dk/(2*np.pi)**2
+            sigma_sea_xx *= 2*np.pi*dk/(2*np.pi)**2
+
+
+            
+            return sigma_sur_xx,sigma_sea_xx,sigma_sur_xy,sigma_sea_xy
 
 
     def calc_g_k_phonons(self,k_point,phonon_params):
