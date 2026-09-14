@@ -273,17 +273,21 @@ class Solver:
             
             ene_mat=np.zeros((len(self.model.k_grid),self.model.lattice.norbs),dtype=np.float64)
             vec_mat=np.zeros((len(self.model.k_grid),self.model.lattice.norbs,self.model.lattice.norbs),dtype=np.complex128)
-            sigma_sur_xx=np.zeros(len(phi_vec),len(mu_vec),dtype=np.float64)
-            sigma_sur_xy=np.zeros(len(phi_vec),len(mu_vec),dtype=np.float64)
-            sigma_sea_xy=np.zeros(len(phi_vec),len(mu_vec),dtype=np.float64)
-            sigma_sea_xx=np.zeros(len(phi_vec),len(mu_vec),dtype=np.float64)
+            sigma_sur_xx=np.zeros((len(phi_vec),len(mu_vec)),dtype=np.float64)
+            sigma_sur_xy=np.zeros((len(phi_vec),len(mu_vec)),dtype=np.float64)
+            sigma_sea_xy=np.zeros((len(phi_vec),len(mu_vec)),dtype=np.float64)
+            sigma_sea_xx=np.zeros((len(phi_vec),len(mu_vec)),dtype=np.float64)
             
             for i in tqdm(range(len(self.model.k_grid))):
+
                 H,Vx,Vy=self.H_k_1_and_V_k_1(self.model.k_grid[i])
                 ene_mat[i,:],vec_mat[i,:]=np.linalg.eigh(H)
+
                 for j in range(len(phi_vec)):
+
                     Vx_rot=Vx*np.cos(phi_vec[j])+np.sin(phi_vec[j])*Vy
                     Vy_rot=Vy*np.cos(phi_vec[j])-np.sin(phi_vec[j])*Vx
+
                     if operator is None:
 
                         Vx_O_rot=Vx_rot
