@@ -146,6 +146,7 @@ class Model:
         H_entries = []
         Dx_entries = []
         Dy_entries = []
+        Dz_entries = []
 
         S = np.zeros((N, len(self.lattice.a1)), dtype=float)
         Omega=np.linalg.norm(np.cross(self.n1*self.lattice.a1,self.n2*self.lattice.a2))
@@ -238,10 +239,12 @@ class Model:
                             H_entries.append((offset1+oi, offset2+oj, t[i,j]))
                             Dx_entries.append((offset1 + oi,offset2 + oj,  dr[0]))
                             Dy_entries.append((offset1 + oi,offset2 + oj,  dr[1]))
+                            Dz_entries.append((offset1 + oi,offset2 + oj,  dr[2]))
 
                             H_entries.append((offset2+oj, offset1+oi, t[i,j].conjugate()))
                             Dx_entries.append((offset2 + oj,offset1 + oi,  -dr[0]))
                             Dy_entries.append((offset2 + oj,offset1 + oi,  -dr[1]))
+                            Dz_entries.append((offset2 + oj,offset1 + oi,  -dr[2]))
 
                             
 
@@ -262,11 +265,14 @@ class Model:
 
         Dy = build_csr(Dy_entries)
 
+        Dz = build_csr(Dz_entries)
+
         print('Number of unit cells : '+str(self.n1)+' x '+str(self.n2 )+' = '+str(self.n1*self.n2))
         print('NUmber of orbitals in each unit cell : '+str(self.lattice.norbs))
         print('H : '+str(H.shape))
         print('Dx shape : '+str(Dx.shape))
         print('Dy shape : '+str(Dy.shape))
+        print('Dz shape : '+str(Dz.shape))
         print('Size of H : '+str(((H.data.nbytes +H.indices.nbytes +H.indptr.nbytes)) / (1024**2))+' Mb')
 
         self.index_list=index_list
@@ -274,6 +280,7 @@ class Model:
         self.H=H
         self.Dx=Dx
         self.Dy=Dy
+        self.Dz=Dz
         self.S=S
         self.Omega=Omega
         return 

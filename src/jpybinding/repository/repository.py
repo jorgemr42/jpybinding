@@ -994,3 +994,83 @@ def lattice_square_bipartite_SK_d_SOC(m=0,hop=None,lambda_SOC=0.1,delta=0.5,B=0)
     
 
     return lattice
+
+
+
+def lattice_square_bipartite_SK_d_SOC_distorted_z(m=0,hop=None,lambda_SOC=0.1,delta=0.5,B=0,alpha=0):
+    """                                
+    Default parameters are extracted from : https://doi.org/10.1103/PhysRevLett.121.086602 (and match them with some tatiana paper)
+    The L matrices can be found in here : https://journals.aps.org/prb/pdf/10.1103/PhysRevB.98.214405
+    """
+    # dxy (4), dyz (5), dzx (6), d_x2y2 (7), d_3z2r2 (8)
+
+    
+    d = 2  # [A] unit cell length
+    pos_A=np.array([0, 0, 0])
+    pos_B=np.array([d/2, d/2,alpha*d/2])
+
+    a1=np.array([d, 0, 0])
+    a2=np.array([0, d, 0])
+    onsites = np.diag([hop['Es'],hop['Ep'], hop['Ep'], hop['Ep'],hop['Ed2'], hop['Ed1'], hop['Ed1'], hop['Ed2'], hop['Ed0']])    # # SOC part
+
+    Lp = [
+    np.array([[0,0,0],[0,0,-1j],[0,1j,0]]),
+    np.array([[0,0,1j],[0,0,0],[-1j,0,0]]),
+    np.array([[0,-1j,0],[1j,0,0],[0,0,0]])
+    ]
+
+    Ld = [
+        np.array([
+            [0, 0, -1j, 0, 0],
+            [0, 0,  0, -1j, -1j*np.sqrt(3)],
+            [1j, 0, 0, 0, 0],
+            [0, 1j, 0, 0, 0],
+            [0, 1j*np.sqrt(3), 0, 0, 0]
+        ]),np.array([
+            [0,  1j, 0, 0, 0],
+            [-1j, 0, 0, 0, 0],
+            [0, 0, 0, -1j, 1j*np.sqrt(3)],
+            [0, 0, 1j, 0, 0],
+            [0, 0, -1j*np.sqrt(3), 0, 0]
+        ]),np.array([
+            [0, 0, 0,  2j, 0],
+            [0, 0, 1j,  0, 0],
+            [0, -1j, 0, 0, 0],
+            [-2j, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0]])]
+
+
+    L=[sci.sparse.block_diag([np.array([[0]]),Lp[i],Ld[i]]).toarray() for i in range(3)]
+
+
+    Sx=0.5*np.array([[0,1],[1,0]])
+    Sy=0.5*np.array([[0,-1j],[1j,0]])
+    Sz=0.5*np.array([[1,0],[0,-1]])
+    L_S=2*lambda_SOC*(np.kron(L[0],Sx)+np.kron(L[1],Sy)+np.kron(L[2],Sz))
+
+    
+    
+    # create a simple 2D lattice with vectors a1 and a2
+    lattice = jpb.Lattice(a1, a2)
+ 
+    lattice.add_sublattices(
+        ('A', pos_A ,m*np.kron(np.eye(9),np.eye(2))+np.kron(onsites,np.eye(2))+L_S+np.kron(np.eye(9),B*np.array([[1,0],[0,-1]]))),  # add an atom called 'A' at position [0, 0]
+        ('B', pos_B ,-m*np.kron(np.eye(9),np.eye(2))+np.kron(onsites,np.eye(2))+L_S+np.kron(np.eye(9),B*np.array([[1,0],[0,-1]]))),  # add an atom called 'A' at position [0, 0]
+    )
+    lattice.add_hoppings(
+        # (relative_index, from_sublattice, to_sublattice, energy)
+        ## Same lattice
+        ([1, 0], 'A', 'A', np.kron(Slater_Koaster_s_px_py_pz_d(pos_A-pos_A-(1*a1+0*a2),hop['Vsss'],hop['Vsps'],hop['Vpps'],hop['Vppp'],hop['Vsds'],hop['Vpds'],hop['Vpdp'],hop['Vdds'],hop['Vddp'],hop['Vddd']),np.eye(2))),
+        ([0, 1], 'A', 'A', np.kron(Slater_Koaster_s_px_py_pz_d(pos_A-pos_A-(0*a1+1*a2),hop['Vsss'],hop['Vsps'],hop['Vpps'],hop['Vppp'],hop['Vsds'],hop['Vpds'],hop['Vpdp'],hop['Vdds'],hop['Vddp'],hop['Vddd']),np.eye(2))), 
+        ([1, 0], 'B', 'B', np.kron(Slater_Koaster_s_px_py_pz_d(pos_B-pos_B-(1*a1+0*a2),hop['Vsss'],hop['Vsps'],hop['Vpps'],hop['Vppp'],hop['Vsds'],hop['Vpds'],hop['Vpdp'],hop['Vdds'],hop['Vddp'],hop['Vddd']),np.eye(2))),
+        ([0, 1], 'B', 'B', np.kron(Slater_Koaster_s_px_py_pz_d(pos_B-pos_B-(0*a1+1*a2),hop['Vsss'],hop['Vsps'],hop['Vpps'],hop['Vppp'],hop['Vsds'],hop['Vpds'],hop['Vpdp'],hop['Vdds'],hop['Vddp'],hop['Vddd']),np.eye(2))),
+        ## Different lattice
+        ([0, 0], 'A', 'B',  np.kron(delta*Slater_Koaster_s_px_py_pz_d(+pos_A-pos_B-(+0*a1+0*a2),hop['Vsss'],hop['Vsps'],hop['Vpps'],hop['Vppp'],hop['Vsds'],hop['Vpds'],hop['Vpdp'],hop['Vdds'],hop['Vddp'],hop['Vddd']),np.eye(2))),
+        ([-1, -1], 'A', 'B',np.kron(delta*Slater_Koaster_s_px_py_pz_d(+pos_A-pos_B-(-1*a1-1*a2),hop['Vsss'],hop['Vsps'],hop['Vpps'],hop['Vppp'],hop['Vsds'],hop['Vpds'],hop['Vpdp'],hop['Vdds'],hop['Vddp'],hop['Vddd']),np.eye(2))),
+        ([-1, 0], 'A', 'B', np.kron(delta*Slater_Koaster_s_px_py_pz_d(+pos_A-pos_B-(-1*a1+0*a2),hop['Vsss'],hop['Vsps'],hop['Vpps'],hop['Vppp'],hop['Vsds'],hop['Vpds'],hop['Vpdp'],hop['Vdds'],hop['Vddp'],hop['Vddd']),np.eye(2))),
+        ([0, -1], 'A', 'B', np.kron(delta*Slater_Koaster_s_px_py_pz_d(+pos_A-pos_B-(+0*a1-1*a2),hop['Vsss'],hop['Vsps'],hop['Vpps'],hop['Vppp'],hop['Vsds'],hop['Vpds'],hop['Vpdp'],hop['Vdds'],hop['Vddp'],hop['Vddd']),np.eye(2))),
+        
+ )
+    
+
+    return lattice
