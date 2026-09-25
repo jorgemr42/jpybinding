@@ -917,7 +917,7 @@ def Slater_Koaster_s_px_py_pz_d(e,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,V
 
 
 
-def lattice_square_bipartite_SK_d_SOC(m=0,Es=3.2,Ep=-0.5,Ed=0,Vsss=-0.5,Vsps=0.5,Vpps=0.5,Vppp=-0.2,Vsds=0,Vpds=0,Vpdp=0,Vdds=0,Vddp=0,Vddd=0,lambda_SOC=0.1,delta=0.5,B=0):
+def lattice_square_bipartite_SK_d_SOC(m=0,hop=None,lambda_SOC=0.1,delta=0.5,B=0):
     """                                
     Default parameters are extracted from : https://doi.org/10.1103/PhysRevLett.121.086602 (and match them with some tatiana paper)
     The L matrices can be found in here : https://journals.aps.org/prb/pdf/10.1103/PhysRevB.98.214405
@@ -931,8 +931,7 @@ def lattice_square_bipartite_SK_d_SOC(m=0,Es=3.2,Ep=-0.5,Ed=0,Vsss=-0.5,Vsps=0.5
 
     a1=np.array([d, 0, 0])
     a2=np.array([0, d, 0])
-    onsites=np.diag([Es,Ep,Ep,Ep,Ed,Ed,Ed,Ed,Ed])
-    # # SOC part
+    onsites = np.diag([hop['Es'],hop['Ep'], hop['Ep'], hop['Ep'],hop['Ed2'], hop['Ed1'], hop['Ed1'], hop['Ed2'], hop['Ed0']])    # # SOC part
 
     Lp = [
     np.array([[0,0,0],[0,0,-1j],[0,1j,0]]),
@@ -981,15 +980,15 @@ def lattice_square_bipartite_SK_d_SOC(m=0,Es=3.2,Ep=-0.5,Ed=0,Vsss=-0.5,Vsps=0.5
     lattice.add_hoppings(
         # (relative_index, from_sublattice, to_sublattice, energy)
         ## Same lattice
-        ([1, 0], 'A', 'A', np.kron(Slater_Koaster_s_px_py_pz_d(pos_A-pos_A-(1*a1+0*a2),Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
-        ([0, 1], 'A', 'A', np.kron(Slater_Koaster_s_px_py_pz_d(pos_A-pos_A-(0*a1+1*a2),Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))), 
-        ([1, 0], 'B', 'B', np.kron(Slater_Koaster_s_px_py_pz_d(pos_B-pos_B-(1*a1+0*a2),Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
-        ([0, 1], 'B', 'B', np.kron(Slater_Koaster_s_px_py_pz_d(pos_B-pos_B-(0*a1+1*a2),Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
+        ([1, 0], 'A', 'A', np.kron(Slater_Koaster_s_px_py_pz_d(pos_A-pos_A-(1*a1+0*a2),hop['Vsss'],hop['Vsps'],hop['Vpps'],hop['Vppp'],hop['Vsds'],hop['Vpds'],hop['Vpdp'],hop['Vdds'],hop['Vddp'],hop['Vddd']),np.eye(2))),
+        ([0, 1], 'A', 'A', np.kron(Slater_Koaster_s_px_py_pz_d(pos_A-pos_A-(0*a1+1*a2),hop['Vsss'],hop['Vsps'],hop['Vpps'],hop['Vppp'],hop['Vsds'],hop['Vpds'],hop['Vpdp'],hop['Vdds'],hop['Vddp'],hop['Vddd']),np.eye(2))), 
+        ([1, 0], 'B', 'B', np.kron(Slater_Koaster_s_px_py_pz_d(pos_B-pos_B-(1*a1+0*a2),hop['Vsss'],hop['Vsps'],hop['Vpps'],hop['Vppp'],hop['Vsds'],hop['Vpds'],hop['Vpdp'],hop['Vdds'],hop['Vddp'],hop['Vddd']),np.eye(2))),
+        ([0, 1], 'B', 'B', np.kron(Slater_Koaster_s_px_py_pz_d(pos_B-pos_B-(0*a1+1*a2),hop['Vsss'],hop['Vsps'],hop['Vpps'],hop['Vppp'],hop['Vsds'],hop['Vpds'],hop['Vpdp'],hop['Vdds'],hop['Vddp'],hop['Vddd']),np.eye(2))),
         ## Different lattice
-        ([0, 0], 'A', 'B',  np.kron(delta*Slater_Koaster_s_px_py_pz_d(+pos_A-pos_B-(+0*a1+0*a2),Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
-        ([-1, -1], 'A', 'B',np.kron(delta*Slater_Koaster_s_px_py_pz_d(+pos_A-pos_B-(-1*a1-1*a2),Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
-        ([-1, 0], 'A', 'B', np.kron(delta*Slater_Koaster_s_px_py_pz_d(+pos_A-pos_B-(-1*a1+0*a2),Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
-        ([0, -1], 'A', 'B', np.kron(delta*Slater_Koaster_s_px_py_pz_d(+pos_A-pos_B-(+0*a1-1*a2),Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,Vddd),np.eye(2))),
+        ([0, 0], 'A', 'B',  np.kron(delta*Slater_Koaster_s_px_py_pz_d(+pos_A-pos_B-(+0*a1+0*a2),hop['Vsss'],hop['Vsps'],hop['Vpps'],hop['Vppp'],hop['Vsds'],hop['Vpds'],hop['Vpdp'],hop['Vdds'],hop['Vddp'],hop['Vddd']),np.eye(2))),
+        ([-1, -1], 'A', 'B',np.kron(delta*Slater_Koaster_s_px_py_pz_d(+pos_A-pos_B-(-1*a1-1*a2),hop['Vsss'],hop['Vsps'],hop['Vpps'],hop['Vppp'],hop['Vsds'],hop['Vpds'],hop['Vpdp'],hop['Vdds'],hop['Vddp'],hop['Vddd']),np.eye(2))),
+        ([-1, 0], 'A', 'B', np.kron(delta*Slater_Koaster_s_px_py_pz_d(+pos_A-pos_B-(-1*a1+0*a2),hop['Vsss'],hop['Vsps'],hop['Vpps'],hop['Vppp'],hop['Vsds'],hop['Vpds'],hop['Vpdp'],hop['Vdds'],hop['Vddp'],hop['Vddd']),np.eye(2))),
+        ([0, -1], 'A', 'B', np.kron(delta*Slater_Koaster_s_px_py_pz_d(+pos_A-pos_B-(+0*a1-1*a2),hop['Vsss'],hop['Vsps'],hop['Vpps'],hop['Vppp'],hop['Vsds'],hop['Vpds'],hop['Vpdp'],hop['Vdds'],hop['Vddp'],hop['Vddd']),np.eye(2))),
         
  )
     
