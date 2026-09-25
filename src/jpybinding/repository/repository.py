@@ -651,12 +651,20 @@ def Slater_Koaster_s_px_py_pz_d(e,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,V
     t_mat[3,2]=e_norm[1]*e_norm[2]*(Vpps-Vppp)
 
     # d-orbitals have the order: dxy (4), dyz (5), dzx (6), d_x2y2 (7), d_3z2r2 (8)
-
+    # (l,m,n)
     ### s-d
 
     # s-dxy hopping
     t_mat[0,4]=np.sqrt(3)*e_norm[0]*e_norm[1]*Vsds
     t_mat[4,0]=t_mat[0,4]
+
+    # s-dyz hopping
+    t_mat[0,5]=np.sqrt(3)*e_norm[1]*e_norm[2]*Vsds
+    t_mat[5,0]=t_mat[0,5]
+
+    # s-dzx hopping
+    t_mat[0,6]=np.sqrt(3)*e_norm[2]*e_norm[0]*Vsds
+    t_mat[6,0]=t_mat[0,6]
 
 
     # s-d_x2y2 hopping
@@ -667,6 +675,8 @@ def Slater_Koaster_s_px_py_pz_d(e,Vsss,Vsps,Vpps,Vppp,Vsds,Vpds,Vpdp,Vdds,Vddp,V
     # s-d_3z2r2 hopping
     t_mat[0,8]=(e_norm[2]**2-0.5*(e_norm[1]**2+e_norm[0]**2))*Vsds
     t_mat[8,0]=t_mat[0,8]
+
+
 
     ### p-d
 
