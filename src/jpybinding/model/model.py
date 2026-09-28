@@ -283,7 +283,7 @@ class Model:
         self.Dz=Dz
         self.S=S
         self.Omega=Omega
-        return 
+        return
 
 
     
