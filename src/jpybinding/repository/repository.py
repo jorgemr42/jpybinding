@@ -9,9 +9,9 @@ def lattice_square(t=-1):
     d = 1  # [nm] unit cell length
 
     # create a simple 2D lattice with vectors a1 and a2
-    lattice = jpb.Lattice(a1=[d, 0], a2=[0, d])
+    lattice = jpb.Lattice(a1=[d, 0,0], a2=[0, d,0])
     lattice.add_sublattices(
-        ('A', [0, 0])  # add an atom called 'A' at position [0, 0]
+        ('A', [0, 0,0])  # add an atom called 'A' at position [0, 0]
     )
     lattice.add_hoppings(
         # (relative_index, from_sublattice, to_sublattice, energy)
@@ -28,10 +28,10 @@ def lattice_monolayer_graphene(m=0):
     a_cc = 0.142  # [nm] carbon-carbon distance
     t = -2.7      # [eV] nearest neighbour hopping
 
-    lat = jpb.Lattice(a1=[a, 0],
-                     a2=[a/2, a/2 * np.sqrt(3)])
-    lat.add_sublattices(('A', [0, -a_cc/2],m),
-                        ('B', [0,  a_cc/2],-m))
+    lat = jpb.Lattice(a1=[a, 0,0],
+                     a2=[a/2, a/2 * np.sqrt(3),0])
+    lat.add_sublattices(('A', [0, -a_cc/2,0],m),
+                        ('B', [0,  a_cc/2,0],-m))
     lat.add_hoppings(
         # inside the main cell
         ([0,  0], 'A', 'B', t),

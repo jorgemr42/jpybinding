@@ -246,11 +246,6 @@ class Model:
                             Dy_entries.append((offset2 + oj,offset1 + oi,  -dr[1]))
                             Dz_entries.append((offset2 + oj,offset1 + oi,  -dr[2]))
 
-                            
-
-
-
-
 
         def build_csr(entries):
             rows = np.fromiter((e[0] for e in entries), dtype=np.int32)
