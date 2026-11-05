@@ -3,6 +3,23 @@ import matplotlib.pyplot as plt
 import scipy as sci
 import jpybinding as jpb
 
+def linear_chain(t=-1):
+    d = 1  # [nm] unit cell length
+
+    # create a simple 2D lattice with vectors a1 and a2
+    lattice = jpb.Lattice(a1=[d, 0,0], a2=[0, 3*d,0])
+    lattice.add_sublattices(
+        ('A', [0, 0,0])  # add an atom called 'A' at position [0, 0]
+    )
+    lattice.add_hoppings(
+        # (relative_index, from_sublattice, to_sublattice, energy)
+        ([1, 0], 'A', 'A', t))
+    
+
+    return lattice
+
+
+
 
 def lattice_square(t=-1):
     
@@ -57,12 +74,12 @@ def lattice_monolayer_graphene_4atoms(m=0):
 
     t=-2.7
 
-    lat = jpb.Lattice(a1=[a, 0], a2=[0, 3*a_cc])
+    lat = jpb.Lattice(a1=[a, 0,0], a2=[0, 3*a_cc,0])
 
-    lat.add_sublattices(('A1',  [  0, 0], m),
-                        ('B1',  [  0,  a_cc], -m),
-                        ('A2',  [a / 2, 1.5*a_cc], m),
-                        ('B2',  [a / 2, 2.5 * a_cc], -m))
+    lat.add_sublattices(('A1',  [  0, 0,0], m),
+                        ('B1',  [  0,  a_cc,0], -m),
+                        ('A2',  [a / 2, 1.5*a_cc,0], m),
+                        ('B2',  [a / 2, 2.5 * a_cc,0], -m))
     lat.add_hoppings(
         # inside the unit sell
         ([0, 0], 'A1',  'B1',  t),
@@ -77,20 +94,20 @@ def lattice_monolayer_graphene_4atoms(m=0):
     return lat
 
 
-def attice_Haldane(t=-2.7,m=0,t2=2/(3*np.sqrt(3))):
+def lattice_haldane(t=-2.7,m=0,t2=2/(3*np.sqrt(3))):
 
     a = 0.24595   # [nm] unit cell length
     a_cc = 0.142  # [nm] carbon-carbon distance
 
     lat = jpb.Lattice(
-        a1=[a, 0],
-        a2=[a/2, a/2 * np.sqrt(3)]
+        a1=[a, 0,0],
+        a2=[a/2, a/2 * np.sqrt(3),0]
     )
 
     lat.add_sublattices(
         # name and position
-        ('A', [0, -a_cc/2],-m),
-        ('B', [0,  a_cc/2],m)
+        ('A', [0, -a_cc/2,0],-m),
+        ('B', [0,  a_cc/2,0],m)
     )
 
     lat.add_hoppings(
