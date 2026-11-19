@@ -41,10 +41,34 @@ def reciprocal_vectors_calc(lat):
 
     return reciprocal_vectors_list
 
+def vacancies(S,n,seed=None):
+    """
+    Def:
+        Delete a percentage of the site of an array of sites.
+    Inputs:
+        W : Array of sites in the order S[:,i] coordinate i of all the sites.
+        n : Fraction of sites that you want to remove.
+        seed : Random seed
+    Outputs:
+        S_1 : Array of sites with already deleted sites. 
+    """
+
+    N_d=int(S.shape[0]*n)
+
+    if N_d==0:
+        print('You have insert a very small percentage increase either the system size or the percentage.')
+
+
+    rng = np.random.default_rng(seed) 
+    random_sites = rng.choice(S.shape[0], size=N_d, replace=False)
+    random_sites = np.array(random_sites, order='C', dtype=np.int32)
+    
+    return np.delete(S,random_sites,axis=0)
+
 class Model:
 
     def __init__(self, lattice, n1=None, n2=None,space="reciprocal"):
-
+        self.n_vec=None
         self.lattice = lattice
         self.n1=n1
         
@@ -148,7 +172,13 @@ class Model:
         Dy_entries = []
         Dz_entries = []
 
-        S = np.zeros((N, len(self.lattice.a1)), dtype=float)
+        if self.n_vac is None:
+            S = np.zeros((N, len(self.lattice.a1)), dtype=float)
+        else:
+            S0 = np.zeros((N, len(self.lattice.a1)), dtype=float)
+            S = vacancies(S0,self.n_vec)
+
+
         Omega=np.linalg.norm(np.cross(self.n1*self.lattice.a1,self.n2*self.lattice.a2))
 
         def cell_index(ix, iy):

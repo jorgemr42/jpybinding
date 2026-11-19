@@ -138,7 +138,7 @@ class Lattice:
         plt.xlim([np.min([a1[0],a2[0]])-0.25,np.max([a1[0],a2[0]])+0.25])
         plt.ylim([np.min([a1[1],a2[1]])-0.25,np.max([a1[1],a2[1]])+0.25])
     
-    def max_distance_lattice(self):
+    def max_distance(self):
         dist_vec=np.zeros(len(self.hoppings))
 
         for i in range(len(self.hoppings)):
