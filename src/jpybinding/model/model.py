@@ -441,6 +441,8 @@ class Model:
         self.H_vac=self.H[mask, :][:, mask]
         self.Dx_vac=self.Dx[mask, :][:, mask]
         self.Dy_vac=self.Dy[mask, :][:, mask]
+        self.Dz_vac=self.Dz[mask, :][:, mask]
+        self.S_vac=self.S[mask, :]
         
         return 
 
