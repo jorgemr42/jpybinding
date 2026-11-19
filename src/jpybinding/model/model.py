@@ -172,11 +172,10 @@ class Model:
         Dy_entries = []
         Dz_entries = []
 
-        if self.n_vac is None:
-            S = np.zeros((N, len(self.lattice.a1)), dtype=float)
-        else:
-            S0 = np.zeros((N, len(self.lattice.a1)), dtype=float)
-            S = vacancies(S0,self.n_vec)
+        S = np.zeros((N, len(self.lattice.a1)), dtype=float)
+        
+        if self.n_vac is not None:
+            S = vacancies(S,self.n_vac)
 
 
         Omega=np.linalg.norm(np.cross(self.n1*self.lattice.a1,self.n2*self.lattice.a2))
